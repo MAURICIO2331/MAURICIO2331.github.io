@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EST 36 - Portal Escolar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primario: #7B1C2E;
+    --primario-oscuro: #55121F;
+    --primario-claro: #A63248;
+    --primario-bg: #F9EAED;
+    --acento: #C0392B;
+    --dorado: #B8860B;
+    --dorado-claro: #D4A017;
+    --dorado-bg: #FDF3DC;
+    --verde: #1A6B4A;
+    --verde-bg: #E6F4EE;
+    --azul: #185FA5;
+    --azul-bg: #E6F1FB;
+    --gris-texto: #1E1A1B;
+    --gris-sec: #5F5055;
+    --gris-borde: #D9CDD0;
+    --fondo: #F8F4F5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--fondo); color: var(--gris-texto); min-height: 100vh; }
+
+  .pantalla { display: none; min-height: 100vh; }
+  .pantalla.activa { display: flex; flex-direction: column; }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: var(--primario); color: white;
+    padding: 0 2rem; display: flex; align-items: center;
+    justify-content: space-between; min-height: 70px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 10px rgba(123,28,46,0.3);
+  }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .header-escudo {
+    width: 46px; height: 46px; border-radius: 50%; overflow: hidden;
+    border: 2px solid var(--dorado-claro); flex-shrink: 0;
+    background: var(--primario-oscuro);
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* CAMBIO 2: Logo en header — reemplaza el span con <img> cuando tengas el archivo */
+  .logo-placeholder { font-weight: 700; font-size: 11px; color: var(--dorado-claro); font-family: 'Playfair Display', serif; text-align: center; line-height: 1.1; }
+  .header-titulo { font-family: 'Playfair Display', serif; }
+  .header-titulo h1 { font-size: 15px; font-weight: 700; line-height: 1.2; }
+  .header-titulo p { font-size: 11px; opacity: 0.75; font-weight: 300; }
+  .header-user { display: flex; align-items: center; gap: 10px; }
+  .badge-rol { background: var(--dorado-claro); color: var(--primario-oscuro); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .btn-salir { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+  .btn-salir:hover { background: rgba(255,255,255,0.22); }
+
+  /* ===== LOGIN — CAMBIO 1: franja vino HORIZONTAL en la parte superior ===== */
+  #login {
+    background: white;
+    justify-content: center; align-items: center; padding: 2rem;
+    position: relative; overflow: hidden;
+  }
+  /* Franja vino en la parte SUPERIOR (horizontal) */
+  #login::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 18%;
+    background: linear-gradient(90deg, #3B0A14 0%, #7B1C2E 50%, #A63248 100%);
+    z-index: 0;
+  }
+  /* Círculo decorativo en la franja superior */
+  #login::after {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    border: 40px solid rgba(255,255,255,0.08);
+    border-radius: 50%;
+    top: -60px; right: 60px;
+    z-index: 0;
+  }
+  .login-card {
+    background: white; border-radius: 20px; padding: 2.5rem;
+    width: 100%; max-width: 460px; position: relative; z-index: 1;
+    box-shadow: 0 8px 40px rgba(123,28,46,0.13);
+    border: 1px solid #eee;
+    /* Empuja la card un poco hacia abajo para que quede centrada visualmente */
+    margin-top: 4rem;
+  }
+  .login-escuela-header { text-align: center; margin-bottom: 2rem; }
+  .login-escudo-grande {
+    width: 88px; height: 88px; background: var(--primario); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem; border: 4px solid var(--dorado-claro); overflow: hidden;
+  }
+  /* CAMBIO 2: Logo en login — reemplaza el span con <img> cuando tengas el archivo */
+  .login-escudo-grande .logo-big { font-size: 24px; font-weight: 700; color: var(--dorado-claro); font-family: 'Playfair Display', serif; }
+  .login-escuela-header h2 { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--primario); line-height: 1.3; }
+  .login-escuela-header p { font-size: 12px; color: var(--gris-sec); margin-top: 4px; }
+
+  .perfiles-hint { background: var(--primario-bg); border: 1px solid #e8b4bc; border-radius: 10px; padding: 12px 14px; margin-bottom: 1.25rem; font-size: 12px; color: var(--primario); }
+  .perfiles-hint strong { display: block; margin-bottom: 6px; font-size: 13px; }
+  .perfiles-hint table { width: 100%; border-collapse: collapse; }
+  .perfiles-hint td { padding: 2px 6px; }
+  .perfiles-hint td:first-child { font-weight: 600; width: 110px; }
+
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--gris-sec); }
+  .form-group input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gris-borde); border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; transition: border-color 0.2s; outline: none; text-transform: uppercase; }
+  .form-group input:focus { border-color: var(--primario); }
+  .form-group input#login-password { text-transform: none; }
+  .pass-wrap { position: relative; }
+  .pass-wrap input { padding-right: 44px; }
+  .toggle-pass { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: var(--gris-sec); }
+  .btn-primary { width: 100%; background: var(--primario); color: white; border: none; padding: 13px; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+  .btn-primary:hover { background: var(--primario-oscuro); }
+  .btn-primary:active { transform: scale(0.98); }
+
+  /* ===== MAIN ===== */
+  .main-content { flex: 1; display: flex; flex-direction: column; }
+  .content-body { flex: 1; padding: 1.5rem 2rem; max-width: 1100px; width: 100%; margin: 0 auto; }
+
+  /* ===== TABS ===== */
+  .tabs-nav { display: flex; gap: 4px; background: white; border-radius: 12px; padding: 6px; margin-bottom: 1.5rem; border: 1px solid var(--gris-borde); flex-wrap: wrap; }
+  .tab-btn { padding: 9px 18px; border-radius: 8px; border: none; background: transparent; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--gris-sec); transition: all 0.2s; white-space: nowrap; }
+  .tab-btn:hover { background: var(--fondo); }
+  .tab-btn.activo { background: var(--primario); color: white; }
+
+  .seccion { display: none; }
+  .seccion.activa { display: block; }
+
+  /* ===== COMUNICADOS ===== */
+  .comunicado-card { background: white; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid var(--gris-borde); }
+  .comunicado-card .com-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .comunicado-card h3 { font-size: 15px; font-weight: 600; color: var(--primario); }
+  .comunicado-card .com-fecha { font-size: 12px; color: var(--gris-sec); white-space: nowrap; margin-left: 8px; }
+  .comunicado-card p { font-size: 14px; color: var(--gris-sec); line-height: 1.6; }
+  .tag-com { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-bottom: 6px; }
+  .tag-general { background: var(--azul-bg); color: var(--azul); }
+  .tag-urgente { background: var(--primario-bg); color: var(--primario); }
+  .tag-evento { background: var(--dorado-bg); color: var(--dorado); }
+
+  /* ===== TRABAJOS ===== */
+  .trabajo-card { background: white; border-radius: 12px; border: 1px solid var(--gris-borde); overflow: hidden; margin-bottom: 1rem; }
+  .trabajo-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid var(--gris-borde); gap: 1rem; flex-wrap: wrap; }
+  .trabajo-header h3 { font-size: 14px; font-weight: 600; }
+  .trabajo-header .materia { font-size: 12px; color: var(--gris-sec); }
+  .estado-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .entregado { background: #EAF3DE; color: #2D6A0A; }
+  .pendiente { background: var(--primario-bg); color: var(--primario); }
+  .trabajo-body { padding: 1rem 1.25rem; }
+  .trabajo-body p { font-size: 13px; color: var(--gris-sec); line-height: 1.5; }
+  .upload-trabajo { margin-top: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .btn-upload-small { background: var(--azul-bg); color: var(--azul); border: 1.5px solid #c2d9f0; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+  .btn-upload-small:hover { background: #d0e8f8; }
+  .retro-box { background: var(--verde-bg); border: 1px solid #a8ddc7; border-radius: 8px; padding: 10px 14px; margin-top: 10px; font-size: 13px; color: #0a4a38; line-height: 1.5; }
+  .retro-box strong { display: block; font-size: 12px; margin-bottom: 4px; color: var(--verde); }
+
+  /* ===== BOLETAS ===== */
+  .boleta-card { background: white; border-radius: 12px; border: 1px solid var(--gris-borde); padding: 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; }
+  .boleta-icono { width: 56px; height: 56px; background: var(--primario-bg); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+  .boleta-info h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .boleta-info p { font-size: 13px; color: var(--gris-sec); }
+  .btn-ver-boleta { margin-left: auto; background: var(--primario); color: white; border: none; padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; flex-shrink: 0; }
+  .btn-ver-boleta:hover { background: var(--primario-oscuro); }
+  .boleta-bloqueada { background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: 14px 18px; font-size: 13px; color: #7a5c00; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 1rem; }
+  .modal-overlay.abierto { display: flex; }
+  .modal-box { background: white; border-radius: 16px; width: 100%; max-width: 700px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--gris-borde); }
+  .modal-header h3 { font-size: 16px; font-weight: 600; }
+  .modal-cerrar { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gris-sec); }
+  .boleta-viewer { flex: 1; padding: 2rem; overflow-y: auto; background: var(--fondo); }
+  .boleta-doc { background: white; border-radius: 12px; padding: 2rem; border: 2px solid var(--gris-borde); pointer-events: none; user-select: none; }
+  .boleta-doc h2 { font-family: 'Playfair Display', serif; text-align: center; color: var(--primario); margin-bottom: 4px; }
+  .boleta-doc .boleta-sub { text-align: center; font-size: 13px; color: var(--gris-sec); margin-bottom: 1.5rem; }
+  .boleta-tabla { width: 100%; border-collapse: collapse; }
+  .boleta-tabla th { background: var(--primario); color: white; padding: 8px 12px; font-size: 13px; text-align: left; }
+  .boleta-tabla td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid var(--gris-borde); }
+  .boleta-tabla tr:nth-child(even) td { background: var(--fondo); }
+  .cal-alta { color: #2D6A0A; font-weight: 600; }
+  .cal-med { color: var(--dorado); font-weight: 600; }
+  .no-modificar { background: var(--primario-bg); border: 1px solid #e8b4bc; border-radius: 8px; padding: 8px 14px; font-size: 12px; color: var(--primario); text-align: center; margin-top: 1rem; }
+
+  /* ===== FORMS ===== */
+  .form-card { background: white; border-radius: 14px; border: 1px solid var(--gris-borde); padding: 1.5rem; margin-bottom: 1.5rem; }
+  .form-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; padding-bottom: 12px; border-bottom: 1px solid var(--gris-borde); color: var(--primario); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .form-grp { margin-bottom: 1rem; }
+  .form-grp label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--gris-sec); }
+  .form-grp input, .form-grp select, .form-grp textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gris-borde); border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; background: white; color: var(--gris-texto); }
+  .form-grp input:focus, .form-grp select:focus, .form-grp textarea:focus { border-color: var(--primario); }
+  .form-grp textarea { resize: vertical; min-height: 90px; }
+  .btn-accion { background: var(--primario); color: white; border: none; padding: 11px 24px; border-radius: 9px; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.2s; }
+  .btn-accion:hover { background: var(--primario-oscuro); }
+  .btn-accion.secundario { background: white; color: var(--primario); border: 1.5px solid var(--primario); }
+  .btn-accion.secundario:hover { background: var(--primario-bg); }
+  .btn-accion.danger { background: #C0392B; color: white; border: none; }
+  .btn-accion.danger:hover { background: #922B21; }
+  .btn-accion.ok { background: #2D6A0A; color: white; border: none; }
+  .btn-accion.ok:hover { background: #1E4A07; }
+
+  /* ===== WELCOME BANNER ===== */
+  .welcome-banner { background: white; border-radius: 12px; border: 1px solid var(--gris-borde); padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+  .welcome-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--primario); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; flex-shrink: 0; }
+  .welcome-info h2 { font-size: 16px; font-weight: 600; }
+  .welcome-info p { font-size: 13px; color: var(--gris-sec); }
+
+  /* ===== MATERIAL APOYO ===== */
+  .material-upload-area { border: 2px dashed var(--gris-borde); border-radius: 10px; padding: 1.5rem; text-align: center; background: var(--fondo); cursor: pointer; transition: border-color 0.2s, background 0.2s; margin-top: 0.5rem; }
+  .material-upload-area:hover { border-color: var(--primario); background: var(--primario-bg); }
+  .material-upload-area p { font-size: 13px; color: var(--gris-sec); }
+  .material-nombre { font-size: 12px; color: var(--primario); font-weight: 600; margin-top: 6px; }
+
+  /* ===== BOLETAS ADMIN ===== */
+  .boleta-upload-area { border: 2px dashed var(--gris-borde); border-radius: 12px; padding: 2.5rem; text-align: center; background: var(--fondo); cursor: pointer; transition: border-color 0.2s, background 0.2s; margin-bottom: 1rem; }
+  .boleta-upload-area:hover { border-color: var(--primario); background: var(--primario-bg); }
+  .boleta-upload-area .upload-icono { font-size: 36px; margin-bottom: 10px; }
+  .boleta-upload-area p { font-size: 14px; color: var(--gris-sec); }
+  .pdf-lista { margin-top: 1rem; }
+  .pdf-item { background: white; border: 1px solid var(--gris-borde); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .pdf-item .pdf-icono { font-size: 22px; }
+  .pdf-item .pdf-nombre { flex: 1; font-size: 14px; font-weight: 500; }
+  .pdf-item .pdf-fecha { font-size: 12px; color: var(--gris-sec); }
+  .btn-quitar { background: var(--primario-bg); color: var(--primario); border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  /* ===== ALERTAS ===== */
+  .alerta { display: none; padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; margin-bottom: 1rem; }
+  .alerta.exito { background: #EAF3DE; color: #2D6A0A; display: block; }
+  .alerta.error-msg { background: var(--primario-bg); color: var(--primario); display: block; }
+
+  /* ===== ADMIN TABS ===== */
+  .admin-tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .admin-tab { padding: 8px 20px; border-radius: 8px; border: 1.5px solid var(--gris-borde); background: white; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--gris-sec); transition: all 0.2s; }
+  .admin-tab.activo { background: var(--primario); color: white; border-color: var(--primario); }
+  .admin-seccion { display: none; }
+  .admin-seccion.activa { display: block; }
+
+  .registro-tabla { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  .registro-tabla th { background: var(--primario); color: white; padding: 10px 12px; font-size: 13px; text-align: left; }
+  .registro-tabla td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--gris-borde); vertical-align: middle; }
+  .registro-tabla tr:hover td { background: var(--fondo); }
+  .badge-activo { background: #EAF3DE; color: #2D6A0A; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-baja { background: var(--primario-bg); color: var(--primario); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+
+  /* ===== ASIGNACIONES ===== */
+  .asignacion-card { background: white; border-radius: 12px; border: 1px solid var(--gris-borde); overflow: hidden; margin-bottom: 1rem; }
+  .asignacion-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid var(--gris-borde); gap: 1rem; flex-wrap: wrap; }
+  .asignacion-header h3 { font-size: 14px; font-weight: 600; }
+  .asignacion-header .materia { font-size: 12px; color: var(--gris-sec); }
+  .asignacion-body { padding: 1rem 1.25rem; }
+  .entrega-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--fondo); font-size: 13px; gap: 8px; flex-wrap: wrap; }
+  .entrega-row:last-child { border-bottom: none; }
+  .entrega-alumno { font-weight: 500; flex: 1; min-width: 140px; }
+  .entrega-archivo { font-size: 12px; color: var(--azul); text-decoration: underline; cursor: pointer; }
+  .entrega-sin { font-size: 12px; color: var(--gris-sec); }
+  .cal-input { border: 1.5px solid var(--gris-borde); border-radius: 6px; padding: 5px 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; width: 70px; outline: none; text-align: center; }
+  .cal-input:focus { border-color: var(--primario); }
+
+  /* ===== BUZÓN MENSAJES ===== */
+  .mensaje-card { background: white; border-radius: 12px; border: 1px solid var(--gris-borde); padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
+  .mensaje-card.propio { border-left: 4px solid var(--primario); background: var(--primario-bg); }
+  .mensaje-card.recibido { border-left: 4px solid var(--azul); background: var(--azul-bg); }
+  .mensaje-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+  .mensaje-de { font-size: 12px; font-weight: 600; color: var(--gris-sec); }
+  .mensaje-fecha { font-size: 11px; color: var(--gris-sec); }
+  .mensaje-texto { font-size: 14px; color: var(--gris-texto); line-height: 1.5; }
+  .mensaje-vacio { font-size: 14px; color: var(--gris-sec); text-align: center; padding: 2rem; }
+
+  /* ===== CAMBIO PASS ===== */
+  .grupo-separador { background: var(--primario); color: white; padding: 8px 14px; font-size: 13px; font-weight: 600; border-radius: 8px; margin: 1rem 0 0.5rem; }
+  .pass-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--gris-borde); flex-wrap: wrap; }
+  .pass-row:last-child { border-bottom: none; }
+  .pass-nombre { flex: 1; font-size: 13px; font-weight: 500; min-width: 160px; }
+  .pass-curp { font-size: 11px; color: var(--gris-sec); font-family: monospace; }
+  .pass-input { border: 1.5px solid var(--gris-borde); border-radius: 7px; padding: 7px 12px; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; width: 160px; transition: border-color 0.2s; }
+  .pass-input:focus { border-color: var(--primario); }
+  .btn-pass { background: var(--primario); color: white; border: none; padding: 7px 16px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; white-space: nowrap; }
+  .btn-pass:hover { background: var(--primario-oscuro); }
+
+  /* ===== CAMBIO MATERIA ===== */
+  .materia-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--gris-borde); flex-wrap: wrap; }
+  .materia-row:last-child { border-bottom: none; }
+  .materia-nombre { flex: 0 0 200px; font-size: 13px; font-weight: 500; }
+  .materia-sel { border: 1.5px solid var(--gris-borde); border-radius: 7px; padding: 7px 10px; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; min-width: 130px; }
+  .materia-sel:focus { border-color: var(--primario); }
+
+  /* Periodo banner */
+  .periodo-banner { background: var(--primario-bg); border: 1px solid #e8b4bc; border-radius: 10px; padding: 12px 16px; margin-bottom: 1.25rem; font-size: 13px; color: var(--primario); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  /* ===== NOTA LOGO ===== */
+  .nota-logo { background: var(--dorado-bg); border: 1px solid #e8d099; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--dorado); margin-bottom: 1rem; }
+
+  @media (max-width: 700px) {
+    .content-body { padding: 1rem; }
+    .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    .header { padding: 0 1rem; }
+    .header-titulo h1 { font-size: 12px; }
+    .login-card { padding: 1.5rem; margin-top: 2rem; }
+    .pass-input { width: 120px; }
+    #login::before { height: 12%; }
+  }
+  /* ===== APROVECHAMIENTO ACADÉMICO ===== */
+.aprov-layout { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; min-height: 500px; }
+.aprov-sidebar { background: white; border-radius: 14px; border: 1px solid var(--gris-borde); overflow: hidden; }
+.aprov-sidebar-header { background: var(--primario); color: white; padding: 14px 16px; font-size: 14px; font-weight: 600; }
+.aprov-sidebar-header p { font-size: 11px; opacity: 0.75; font-weight: 300; margin-top: 2px; }
+.aprov-grupo-sel { width: 100%; padding: 10px 14px; border: none; border-bottom: 1px solid var(--gris-borde); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; background: white; color: var(--gris-texto); }
+.aprov-alumno-lista { overflow-y: auto; max-height: 480px; }
+.aprov-alumno-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--gris-borde); transition: background 0.15s; }
+.aprov-alumno-item:hover { background: var(--fondo); }
+.aprov-alumno-item.activo { background: var(--primario-bg); border-left: 3px solid var(--primario); }
+.aprov-alumno-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--primario); color: white; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.aprov-alumno-info { flex: 1; min-width: 0; }
+.aprov-alumno-nombre { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aprov-alumno-grupo { font-size: 11px; color: var(--gris-sec); }
+.aprov-semaforo { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.aprov-sem-verde { background: #22c55e; }
+.aprov-sem-amarillo { background: #f59e0b; }
+.aprov-sem-rojo { background: #ef4444; }
+
+.aprov-detalle { background: white; border-radius: 14px; border: 1px solid var(--gris-borde); overflow: hidden; }
+.aprov-detalle-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--gris-borde); }
+.aprov-detalle-header h3 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+.aprov-detalle-header p { font-size: 13px; color: var(--gris-sec); }
+.aprov-vacio { padding: 3rem; text-align: center; color: var(--gris-sec); font-size: 14px; }
+
+.aprov-estatus { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-top: 8px; }
+.aprov-estatus.regular { background: #DCFCE7; color: #15803D; }
+.aprov-estatus.posible  { background: #FEF3C7; color: #92400E; }
+.aprov-estatus.rezagado { background: var(--primario-bg); color: var(--primario); }
+
+.aprov-barra-wrap { margin: 1rem 1.5rem; }
+.aprov-barra-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--gris-sec); margin-bottom: 6px; }
+.aprov-barra-bg { height: 10px; background: var(--gris-borde); border-radius: 10px; overflow: hidden; }
+.aprov-barra-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease; }
+.aprov-barra-fill.verde    { background: #22c55e; }
+.aprov-barra-fill.amarillo { background: #f59e0b; }
+.aprov-barra-fill.rojo     { background: #ef4444; }
+
+.aprov-tabla { width: 100%; border-collapse: collapse; }
+.aprov-tabla th { background: var(--fondo); padding: 10px 14px; font-size: 12px; font-weight: 600; text-align: left; border-bottom: 2px solid var(--gris-borde); color: var(--gris-sec); text-transform: uppercase; letter-spacing: 0.03em; }
+.aprov-tabla td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid var(--gris-borde); vertical-align: middle; }
+.aprov-tabla tr:last-child td { border-bottom: none; }
+.aprov-tabla tr:hover td { background: var(--fondo); }
+.aprov-chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.aprov-chip.si      { background: #EAF3DE; color: #2D6A0A; }
+.aprov-chip.no      { background: var(--primario-bg); color: var(--primario); }
+.aprov-chip.cal     { background: var(--azul-bg); color: var(--azul); }
+.aprov-chip.sin-cal { background: var(--dorado-bg); color: var(--dorado); }
+
+.aprov-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid var(--gris-borde); }
+.aprov-stat { text-align: center; }
+.aprov-stat-num { font-size: 26px; font-weight: 700; color: var(--primario); }
+.aprov-stat-label { font-size: 11px; color: var(--gris-sec); margin-top: 2px; }
+
+/* ADMIN aprovechamiento */
+.aprov-admin-grid { display: grid; grid-template-columns: 220px 1fr; gap: 1.5rem; }
+.aprov-grupos-panel { background: white; border-radius: 14px; border: 1px solid var(--gris-borde); overflow: hidden; }
+.aprov-grupos-panel-header { background: var(--primario); color: white; padding: 14px 16px; font-size: 14px; font-weight: 600; }
+.aprov-grupo-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--gris-borde); font-size: 13px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; transition: background 0.15s; }
+.aprov-grupo-item:hover { background: var(--fondo); }
+.aprov-grupo-item.activo { background: var(--primario-bg); border-left: 3px solid var(--primario); font-weight: 600; }
+.aprov-grupo-badge { font-size: 11px; color: var(--gris-sec); }
+
+@media (max-width: 800px) {
+  .aprov-layout, .aprov-admin-grid { grid-template-columns: 1fr; }
+  .aprov-sidebar { max-height: 280px; }
+}
+</style>
+</head>
+<body>
+
+<!-- =================== LOGIN =================== -->
+<div id="login" class="pantalla activa">
+  <div class="login-card">
+    <div class="login-escuela-header">
+      <div class="login-escudo-grande">
+        <!--
+          CAMBIO 2 — INSTRUCCIONES PARA PONER TU LOGO:
+          1. Sube tu imagen (ej. logo.png) a la misma carpeta que este archivo HTML.
+          2. Borra la línea del <span class="logo-big"> de abajo.
+          3. Pega esto en su lugar:
+             <img src="logo.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+        -->
+        <span class="logo-big">EST</span>
+      </div>
+      <h2>Escuela Secundaria Técnica 36<br>Lic. Adolfo López Mateos</h2>
+      <p>Sistema de Portal Escolar</p>
+    </div>
+
+    <div class="perfiles-hint">
+      <strong>🔑 Perfiles de prueba:</strong>
+      <table>
+        <tr><td>Alumno:</td><td>GARJ090512HDFRZN08 / <em>est36alumno</em></td></tr>
+        <tr><td>Docente:</td><td>RASMS780615MDFMLN0 / <em>est36docente</em></td></tr>
+        <tr><td>Admin:</td><td>LOPC651020HDFPRL03 / <em>est36admin</em></td></tr>
+      </table>
+    </div>
+
+    <div id="login-error" class="alerta error-msg" style="display:none;"></div>
+    <div id="login-detectado" style="display:none;background:var(--primario-bg);border:1px solid #e8b4bc;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--primario);font-weight:500;"></div>
+
+    <div class="form-group">
+      <label>CURP</label>
+      <input type="text" id="login-correo" placeholder="Ej. GARJ090512HDFRZN08" maxlength="18" oninput="detectarRolPorCurp(this.value)">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <div class="pass-wrap">
+        <input type="password" id="login-password" placeholder="••••••••">
+        <button class="toggle-pass" onclick="togglePass('login-password',this)" type="button">👁</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="iniciarSesion()" style="margin-bottom:1rem;">Iniciar sesión</button>
+  </div>
+</div>
+
+
+<!-- =================== PORTAL ALUMNO =================== -->
+<div id="portal-alumno" class="pantalla">
+  <div class="header">
+    <div class="header-logo">
+      <div class="header-escudo">
+        <!--
+          CAMBIO 2 — LOGO EN HEADER:
+          Borra el <span> y pon: <img src="logo.png" style="width:100%;height:100%;object-fit:cover;">
+        -->
+        <span class="logo-placeholder">EST<br>36</span>
+      </div>
+      <div class="header-titulo"><h1>Escuela Secundaria Técnica 36</h1><p>Lic. Adolfo López Mateos</p></div>
+    </div>
+    <div class="header-user">
+      <span class="badge-rol" id="badge-alumno">Alumno</span>
+      <button class="btn-salir" onclick="cerrarSesion()">Salir</button>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="content-body">
+      <div class="welcome-banner">
+        <div class="welcome-avatar" id="avatar-alumno">JG</div>
+        <div class="welcome-info">
+          <h2 id="nombre-alumno">Juan García López</h2>
+          <p id="info-alumno">Alumno • 2° Grado — Grupo B</p>
+        </div>
+      </div>
+      <div class="tabs-nav">
+        <button class="tab-btn activo" onclick="cambiarTab('comunicados-a',this)">📢 Comunicados</button>
+        <button class="tab-btn" onclick="cambiarTab('trabajos-a',this)">📝 Trabajos</button>
+        <button class="tab-btn" onclick="cambiarTab('boletas-a',this)">📄 Boletas</button>
+        <button class="tab-btn" onclick="cambiarTab('buzon-a',this)">✉️ Buzón</button>
+        <button class="tab-btn" onclick="cambiarTab('aprov-a',this);initAprovAlumno()">📊 Mi Aprovechamiento</button>
+      </div>
+      <div id="comunicados-a" class="seccion activa"></div>
+      <div id="trabajos-a" class="seccion">
+        <p style="font-size:13px;color:var(--gris-sec);margin-bottom:1rem;">📤 Puedes subir tus trabajos en formato PDF o imagen (PNG/JPG).</p>
+        <div id="lista-trabajos-alumno"></div>
+      </div>
+      <div id="boletas-a" class="seccion">
+        <div id="boleta-periodo-msg"></div>
+        <div id="boletas-lista-alumno"></div>
+      </div>
+      <div id="buzon-a" class="seccion">
+        <div class="form-card">
+          <h3>✉️ Nuevo mensaje al docente</h3>
+          <div id="msg-al-ok" class="alerta exito" style="display:none;">✓ Mensaje enviado.</div>
+          <div class="form-grp"><label>Docente destinatario</label>
+            <select id="msg-al-docente"></select>
+          </div>
+          <div class="form-grp"><label>Asunto</label>
+            <input type="text" id="msg-al-asunto" placeholder="Ej. Consulta sobre tarea...">
+          </div>
+          <div class="form-grp"><label>Mensaje</label>
+            <textarea id="msg-al-texto" placeholder="Escribe tu mensaje..."></textarea>
+          </div>
+          <button class="btn-accion" onclick="enviarMensajeAlumno()">Enviar mensaje</button>
+        </div>
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--gris-sec);">Mensajes recibidos</h3>
+       <div id="buzon-al-recibidos"></div>
+      </div>
+
+      <!-- APROVECHAMIENTO ALUMNO -->
+      <div id="aprov-a" class="seccion">
+        <div id="aprov-alumno-resumen"></div>
+        <div id="aprov-alumno-detalle"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- =================== PORTAL DOCENTE =================== -->
+<div id="portal-docente" class="pantalla">
+  <div class="header">
+    <div class="header-logo">
+      <div class="header-escudo"><span class="logo-placeholder">EST<br>36</span></div>
+      <div class="header-titulo"><h1>Escuela Secundaria Técnica 36</h1><p>Lic. Adolfo López Mateos</p></div>
+    </div>
+    <div class="header-user">
+      <span class="badge-rol" id="badge-docente">Docente</span>
+      <button class="btn-salir" onclick="cerrarSesion()">Salir</button>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="content-body">
+      <div class="welcome-banner">
+        <div class="welcome-avatar" id="avatar-docente">MR</div>
+        <div class="welcome-info"><h2 id="nombre-docente">María Ramírez Soto</h2><p id="info-docente">Docente</p></div>
+      </div>
+      <div class="tabs-nav">
+        <button class="tab-btn activo" onclick="cambiarTabDoc('comunicados-d',this)">📢 Comunicados</button>
+        <button class="tab-btn" onclick="cambiarTabDoc('actividades-d',this)">📝 Actividades</button>
+        <button class="tab-btn" onclick="cambiarTabDoc('buzon-d',this)">✉️ Buzón</button>
+     <button class="tab-btn" onclick="cambiarTabDoc('aprov-d',this);initAprovDocente()">📊 Aprovechamiento</button>
+      </div>
+
+      <div id="comunicados-d" class="seccion activa">
+        <div class="form-card">
+          <h3>Publicar nuevo comunicado</h3>
+          <div id="com-exito" class="alerta exito" style="display:none;">✓ Comunicado publicado.</div>
+          <div class="form-grp"><label>Título</label><input type="text" id="com-titulo" placeholder="Ej. Suspensión de clases..."></div>
+          <div class="form-row">
+            <div class="form-grp"><label>Tipo</label>
+              <select id="com-tipo"><option value="general">General</option><option value="urgente">Urgente</option><option value="evento">Evento</option></select>
+            </div>
+            <div class="form-grp"><label>Dirigido a</label>
+              <select id="com-dirigido">
+                <option>Todos</option>
+                <option>Alumnos y padres</option>
+                <option>Personal docente</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grp"><label>Contenido</label><textarea id="com-contenido" placeholder="Escribe el contenido..."></textarea></div>
+          <button class="btn-accion" onclick="publicarComunicado()">Publicar comunicado</button>
+        </div>
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--gris-sec);">Comunicados publicados</h3>
+        <div id="lista-comunicados-d"></div>
+      </div>
+
+      <div id="actividades-d" class="seccion">
+        <div class="form-card">
+          <h3>Registrar nueva actividad / asignación</h3>
+          <div id="act-exito" class="alerta exito" style="display:none;">✓ Actividad registrada.</div>
+          <div class="form-row">
+            <div class="form-grp"><label>Materia</label>
+              <select id="act-materia"><option value="">— Selecciona materia —</option></select>
+            </div>
+            <div class="form-grp"><label>Grupo</label>
+              <select id="act-grupo">
+                <option>1° A</option><option>1° B</option><option>1° C</option>
+                <option>2° A</option><option>2° B</option><option>2° C</option>
+                <option>3° A</option><option>3° B</option><option>3° C</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grp"><label>Nombre de la actividad</label><input type="text" id="act-nombre" placeholder="Ej. Tarea: ejercicios álgebra pp. 45–50"></div>
+          <div class="form-row">
+            <div class="form-grp"><label>Tipo de actividad</label>
+              <select id="act-tipo"><option>Tarea</option><option>Trabajo en clase</option><option>Proyecto</option><option>Práctica de laboratorio</option><option>Examen</option></select>
+            </div>
+            <div class="form-grp"><label>Fecha límite</label><input type="date" id="act-fecha"></div>
+          </div>
+          <div class="form-grp"><label>Instrucciones</label><textarea id="act-instrucciones" placeholder="Describe la actividad..."></textarea></div>
+          <div class="form-grp">
+            <label>Material de apoyo (PDF / PNG / JPG — opcional)</label>
+            <div class="material-upload-area" onclick="document.getElementById('material-input').click()">
+              <p>📎 <strong>Haz clic para adjuntar material</strong></p>
+              <p>Formatos: PDF, PNG, JPG</p>
+              <p class="material-nombre" id="material-sel-nombre"></p>
+            </div>
+            <input type="file" id="material-input" accept=".pdf,.png,.jpg,.jpeg" style="display:none;" onchange="materialSeleccionado(this)">
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem;">
+            <button class="btn-accion" onclick="guardarActividad()">Publicar asignación</button>
+            <button class="btn-accion secundario" onclick="limpiarActividad()">Limpiar campos</button>
+          </div>
+        </div>
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--gris-sec);">Asignaciones publicadas</h3>
+        <div id="lista-actividades"></div>
+      </div>
+
+      <div id="buzon-d" class="seccion">
+        <div class="form-card">
+          <h3>✉️ Nuevo mensaje a alumno</h3>
+          <div id="msg-doc-ok" class="alerta exito" style="display:none;">✓ Mensaje enviado.</div>
+          <div class="form-row">
+            <div class="form-grp"><label>Grupo</label>
+              <select id="msg-doc-grupo" onchange="cargarAlumnosSelect()">
+                <option value="">— Selecciona grupo —</option>
+              </select>
+            </div>
+            <div class="form-grp"><label>Alumno destinatario</label>
+              <select id="msg-doc-alumno"><option value="">— Selecciona alumno —</option></select>
+            </div>
+          </div>
+          <div class="form-grp"><label>Asunto</label>
+            <input type="text" id="msg-doc-asunto" placeholder="Ej. Retroalimentación trabajo...">
+          </div>
+          <div class="form-grp"><label>Mensaje</label>
+            <textarea id="msg-doc-texto" placeholder="Escribe tu mensaje..."></textarea>
+          </div>
+          <button class="btn-accion" onclick="enviarMensajeDocente()">Enviar mensaje</button>
+        </div>
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--gris-sec);">Mensajes recibidos de alumnos</h3>
+        <div id="buzon-doc-recibidos"></div>
+      </div><!-- fin buzon-d -->
+
+      <!-- APROVECHAMIENTO DOCENTE -->
+      <div id="aprov-d" class="seccion">
+        <div class="form-card" style="margin-bottom:1rem;">
+          <h3>📊 Aprovechamiento Académico</h3>
+          <p style="font-size:13px;color:var(--gris-sec);">Selecciona un grupo para ver el historial de actividades y estado de entrega de cada alumno.</p>
+        </div>
+        <div class="aprov-layout">
+          <div class="aprov-sidebar">
+            <div class="aprov-sidebar-header">
+              <div>Alumnos</div>
+              <p>Selecciona grupo y alumno</p>
+            </div>
+            <select class="aprov-grupo-sel" id="aprov-doc-grupo" onchange="cargarAlumnosAprovDoc()">
+              <option value="">— Selecciona grupo —</option>
+            </select>
+            <div class="aprov-alumno-lista" id="aprov-doc-lista-alumnos">
+              <div class="aprov-vacio">Selecciona un grupo</div>
+            </div>
+          </div>
+          <div class="aprov-detalle" id="aprov-doc-detalle">
+            <div class="aprov-vacio">👈 Selecciona un alumno para ver su historial</div>
+          </div>
+        </div>
+      </div><!-- fin aprov-d -->
+
+    </div><!-- fin content-body -->
+  </div><!-- fin main-content -->
+</div><!-- fin portal-docente -->
+
+<!-- =================== PORTAL ADMINISTRATIVO =================== -->
+<div id="portal-admin" class="pantalla">
+  <div class="header">
+    <div class="header-logo">
+      <div class="header-escudo"><span class="logo-placeholder">EST<br>36</span></div>
+      <div class="header-titulo"><h1>Escuela Secundaria Técnica 36</h1><p>Panel Administrativo</p></div>
+    </div>
+    <div class="header-user">
+      <span class="badge-rol">Administrativo</span>
+      <button class="btn-salir" onclick="cerrarSesion()">Salir</button>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="content-body">
+      <div class="welcome-banner">
+        <div class="welcome-avatar">CL</div>
+        <div class="welcome-info"><h2>Carlos López Pérez</h2><p>Área Administrativa — Control Escolar</p></div>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab activo" onclick="cambiarAdminTab('tab-alumnos',this)">👨‍🎓 Alumnos</button>
+        <button class="admin-tab" onclick="cambiarAdminTab('tab-docentes',this)">📚 Docentes</button>
+        <button class="admin-tab" onclick="cambiarAdminTab('tab-boletas-admin',this)">📄 Boletas</button>
+        <button class="admin-tab" onclick="cambiarAdminTab('tab-cambio-pass',this)">🔑 Contraseñas</button>
+        <button class="admin-tab" onclick="cambiarAdminTab('tab-cambio-materia',this)">📋 Mat./Grupo</button>
+        <button class="admin-tab" onclick="cambiarAdminTab('tab-comunicados-admin',this)">📢 Comunicados</button>
+      <button class="admin-tab" onclick="cambiarAdminTab('tab-aprov-admin',this);initAprovAdmin()">📊 Aprovechamiento</button>
+      </div>
+
+      <!-- TAB ALUMNOS -->
+      <div id="tab-alumnos" class="admin-seccion activa">
+        <div class="form-card">
+          <h3>Dar de alta — Nuevo alumno</h3>
+          <div id="alta-alumno-ok" class="alerta exito" style="display:none;"></div>
+          <div class="form-row">
+            <div class="form-grp"><label>Nombre(s)</label><input type="text" id="al-nombre" placeholder="Ej. Juan Carlos"></div>
+            <div class="form-grp"><label>Apellidos</label><input type="text" id="al-apellidos" placeholder="Ej. García López"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-grp"><label>CURP</label><input type="text" id="al-curp" placeholder="18 caracteres" maxlength="18" style="text-transform:uppercase;"></div>
+            <div class="form-grp"><label>Grado</label>
+              <select id="al-grado" onchange="actualizarGruposAlumno()">
+                <option value="">— Grado —</option>
+                <option>1°</option><option>2°</option><option>3°</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-grp"><label>Grupo</label>
+              <select id="al-grupo"><option value="">— Selecciona grado primero —</option></select>
+            </div>
+            <div class="form-grp"><label>Contraseña inicial</label><input type="text" id="al-pass" placeholder="Mínimo 6 caracteres"></div>
+          </div>
+          <button class="btn-accion" onclick="altaAlumno()">Registrar alumno</button>
+        </div>
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--gris-sec);">Alumnos registrados</h3>
+        <div style="overflow-x:auto;">
+          <table class="registro-tabla"><thead><tr><th>#</th><th>Nombre</th><th>CURP</th><th>Grupo</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-alumnos-admin"></tbody></table>
+        </div>
+      </div>
+
+      <!-- TAB DOCENTES — CAMBIO 3: sin campo de materias -->
+      <div id="tab-docentes" class="admin-seccion">
+        <div class="form-card">
+          <h3>Dar de alta — Nuevo docente</h3>
+          <div id="alta-docente-ok" class="alerta exito" style="display:none;"></div>
+          <!-- Nota informativa -->
+          <div class="nota-logo" style="background:var(--azul-bg);border-color:#c2d9f0;color:var(--azul);">
+            ℹ️ Las materias se asignan en la pestaña <strong>📋 Mat./Grupo</strong> una vez registrado el docente.
+          </div>
+          <div class="form-row">
+            <div class="form-grp"><label>Nombre(s)</label><input type="text" id="doc-nombre" placeholder="Ej. María Fernanda"></div>
+            <div class="form-grp"><label>Apellidos</label><input type="text" id="doc-apellidos" placeholder="Ej. Ramírez Soto"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-grp"><label>CURP</label><input type="text" id="doc-curp" placeholder="18 caracteres" maxlength="18" style="text-transform:uppercase;"></div>
+            <div class="form-grp"><label>Contraseña inicial</label><input type="text" id="doc-pass" placeholder="Mínimo 6 caracteres"></div>
+          </div>
+          <!-- CAMPO DE MATERIAS ELIMINADO — se asignan desde Mat./Grupo -->
+          <button class="btn-accion" onclick="altaDocente()">Registrar docente</button>
+        </div>
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--gris-sec);">Docentes registrados</h3>
+        <div style="overflow-x:auto;">
+          <table class="registro-tabla"><thead><tr><th>#</th><th>Nombre</th><th>CURP</th><th>Materias asignadas</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-docentes-admin"></tbody></table>
+        </div>
+      </div>
+
+      <!-- TAB BOLETAS -->
+      <div id="tab-boletas-admin" class="admin-seccion">
+        <div class="form-card">
+          <h3>📄 Gestión de Boletas — Control Escolar</h3>
+          <div class="periodo-banner">
+            🗓️ <span>Periodo de descarga de boletas: <strong id="periodo-texto">No activo</strong></span>
+            &nbsp;&nbsp;
+            <button class="btn-pass" onclick="togglePeriodo()" id="btn-toggle-periodo">Activar periodo</button>
+          </div>
+          <div id="bol-exito" class="alerta exito" style="display:none;">✓ Boleta subida exitosamente.</div>
+          <div class="form-row">
+            <div class="form-grp"><label>Grado</label>
+              <select id="bol-grado" onchange="actualizarGruposBoleta()">
+                <option value="">— Grado —</option>
+                <option>1°</option><option>2°</option><option>3°</option>
+              </select>
+            </div>
+            <div class="form-grp"><label>Grupo</label>
+              <select id="bol-grupo"><option value="">— Selecciona grado —</option></select>
+            </div>
+          </div>
+          <div class="form-grp"><label>Bimestre</label>
+            <select id="bol-bimestre"><option>1er Bimestre</option><option>2do Bimestre</option><option>3er Bimestre</option><option>4to Bimestre</option><option>5to Bimestre</option></select>
+          </div>
+          <div class="boleta-upload-area" onclick="document.getElementById('file-input').click()">
+            <div class="upload-icono">📁</div>
+            <p><strong>Haz clic para seleccionar la boleta en PDF</strong></p>
+            <p id="archivo-sel" style="margin-top:8px;color:var(--primario);font-weight:600;"></p>
+          </div>
+          <input type="file" id="file-input" accept=".pdf" style="display:none;" onchange="archivoSeleccionado(this)">
+          <button class="btn-accion" onclick="subirBoleta()">Subir boleta</button>
+        </div>
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--gris-sec);">Boletas disponibles</h3>
+        <div class="pdf-lista" id="lista-pdfs">
+          <div class="pdf-item"><span class="pdf-icono">📄</span><span class="pdf-nombre">Boleta 1er Bimestre — 2° B</span><span class="pdf-fecha">Subida: 20 Feb 2026</span><button class="btn-quitar" onclick="quitarPdf(this)">Quitar</button></div>
+          <div class="pdf-item"><span class="pdf-icono">📄</span><span class="pdf-nombre">Boleta 2do Bimestre — 2° B</span><span class="pdf-fecha">Subida: 15 Abr 2026</span><button class="btn-quitar" onclick="quitarPdf(this)">Quitar</button></div>
+        </div>
+      </div>
+
+      <!-- TAB CAMBIO CONTRASEÑA -->
+      <div id="tab-cambio-pass" class="admin-seccion">
+        <div class="form-card">
+          <h3>🔑 Cambio de contraseña — Alumnos</h3>
+          <p style="font-size:13px;color:var(--gris-sec);margin-bottom:1rem;">Escribe la nueva contraseña y presiona <strong>Guardar</strong>. Mínimo 6 caracteres.</p>
+          <div id="ok-pass-alumno" class="alerta exito" style="display:none;"></div>
+          <div id="pass-alumnos-lista"></div>
+        </div>
+        <div class="form-card">
+          <h3>🔑 Cambio de contraseña — Docentes</h3>
+          <div id="ok-pass-docente" class="alerta exito" style="display:none;"></div>
+          <div id="pass-docentes-lista"></div>
+        </div>
+      </div>
+
+      <!-- TAB CAMBIO MATERIA/GRUPO — CAMBIO 4: confirmación al asignar -->
+      <div id="tab-cambio-materia" class="admin-seccion">
+        <div class="form-card">
+          <h3>📋 Cambio de materias — Docentes</h3>
+          <p style="font-size:13px;color:var(--gris-sec);margin-bottom:1rem;">
+            Selecciona el <strong>grado</strong> y el <strong>grupo</strong> para ver las materias de ese bloque y asignarlas al docente correspondiente.
+            Al seleccionar un docente se pedirá confirmación antes de guardar.
+          </p>
+          <div id="ok-materia" class="alerta exito" style="display:none;"></div>
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="form-grp"><label>Grado</label>
+              <select id="mat-grado" onchange="actualizarGruposMateria()">
+                <option value="">— Selecciona grado —</option>
+                <option>1°</option><option>2°</option><option>3°</option>
+              </select>
+            </div>
+            <div class="form-grp"><label>Grupo</label>
+              <select id="mat-grupo" onchange="renderMateriasGrupo()">
+                <option value="">— Selecciona grupo —</option>
+              </select>
+            </div>
+          </div>
+          <div id="materia-docentes-lista"></div>
+        </div>
+      </div>
+
+      <!-- TAB COMUNICADOS -->
+      <div id="tab-comunicados-admin" class="admin-seccion">
+        <div class="form-card">
+          <h3>Publicar comunicado institucional</h3>
+          <div id="com-admin-ok" class="alerta exito" style="display:none;">✓ Comunicado publicado.</div>
+          <div class="form-grp"><label>Título</label><input type="text" id="com-admin-titulo" placeholder="Ej. Aviso de inicio de ciclo escolar"></div>
+          <div class="form-row">
+            <div class="form-grp"><label>Tipo</label>
+              <select id="com-admin-tipo"><option value="general">General</option><option value="urgente">Urgente</option><option value="evento">Evento</option></select>
+            </div>
+            <div class="form-grp"><label>Dirigido a</label>
+              <select id="com-admin-dirigido"><option>Todos</option><option>Alumnos y padres</option><option>Personal docente</option></select>
+            </div>
+          </div>
+          <div class="form-grp"><label>Contenido</label><textarea id="com-admin-contenido" placeholder="Escribe el contenido..."></textarea></div>
+          <button class="btn-accion" onclick="publicarComunicadoAdmin()">Publicar comunicado</button>
+        </div>
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--gris-sec);">Comunicados publicados</h3>
+    <div id="lista-com-admin"></div>
+      </div>
+
+      <!-- TAB APROVECHAMIENTO ADMIN -->
+      <div id="tab-aprov-admin" class="admin-seccion">
+        <div class="form-card" style="margin-bottom:1rem;">
+          <h3>📊 Aprovechamiento Académico — Todos los grupos</h3>
+          <p style="font-size:13px;color:var(--gris-sec);">Selecciona un grupo del panel izquierdo y luego un alumno para ver su historial completo.</p>
+        </div>
+        <div class="aprov-admin-grid">
+          <div class="aprov-grupos-panel">
+            <div class="aprov-grupos-panel-header">Grupos y grados</div>
+            <div id="aprov-admin-grupos-lista"></div>
+          </div>
+          <div class="aprov-layout" style="grid-template-columns: 240px 1fr; gap:1rem;">
+            <div class="aprov-sidebar">
+              <div class="aprov-sidebar-header">
+                <div>Alumnos</div>
+                <p id="aprov-admin-grupo-label">Selecciona un grupo</p>
+              </div>
+              <div class="aprov-alumno-lista" id="aprov-admin-lista-alumnos">
+                <div class="aprov-vacio">Selecciona un grupo</div>
+              </div>
+            </div>
+            <div class="aprov-detalle" id="aprov-admin-detalle">
+              <div class="aprov-vacio">👈 Selecciona un alumno</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- =================== MODAL BOLETA =================== -->
+<div class="modal-overlay" id="modal-boleta">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📄 Boleta de Calificaciones — 1er Bimestre</h3>
+      <button class="modal-cerrar" onclick="cerrarModal()">✕</button>
+    </div>
+    <div class="boleta-viewer">
+      <div class="boleta-doc">
+        <h2>Escuela Secundaria Técnica No. 36</h2>
+        <p class="boleta-sub">Lic. Adolfo López Mateos • Boleta de Calificaciones — 1er Bimestre 2025–2026</p>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:1rem;font-size:13px;">
+          <tr>
+            <td style="padding:4px;color:var(--gris-sec);">Alumno:</td>
+            <td style="padding:4px;font-weight:600;" id="boleta-nombre-alumno">Juan García López</td>
+            <td style="padding:4px;color:var(--gris-sec);">Grado:</td>
+            <td style="padding:4px;font-weight:600;" id="boleta-grado-alumno">2° B</td>
+          </tr>
+          <tr>
+            <td style="padding:4px;color:var(--gris-sec);">CURP:</td>
+            <td style="padding:4px;font-weight:600;" id="boleta-curp-alumno">GARJ090512HDFRZN08</td>
+            <td style="padding:4px;color:var(--gris-sec);">Ciclo escolar:</td>
+            <td style="padding:4px;font-weight:600;">2025–2026</td>
+          </tr>
+        </table>
+        <table class="boleta-tabla">
+          <thead><tr><th>Asignatura</th><th>Docente</th><th>Calificación</th><th>Observación</th></tr></thead>
+          <tbody>
+            <tr><td>Matemáticas</td><td>Prof. Ramírez</td><td class="cal-alta">9.5</td><td>Excelente desempeño</td></tr>
+            <tr><td>Español</td><td>Prof. Hernández</td><td class="cal-med">7.0</td><td>Pendiente ensayo</td></tr>
+            <tr><td>Tecnología</td><td>Prof. Vázquez</td><td class="cal-alta">9.8</td><td>Destacado</td></tr>
+            <tr><td>Ciencias</td><td>Prof. Torres</td><td class="cal-med">8.0</td><td>Reporte pendiente</td></tr>
+            <tr><td>Historia</td><td>Prof. Morales</td><td class="cal-alta">9.0</td><td>Muy bien</td></tr>
+            <tr><td>Geografía</td><td>Prof. Luna</td><td class="cal-alta">9.2</td><td>Participación activa</td></tr>
+            <tr><td>Inglés</td><td>Prof. Castro</td><td class="cal-med">8.5</td><td>Buen avance</td></tr>
+            <tr><td>Educación Física</td><td>Prof. Guerrero</td><td class="cal-alta">10</td><td>Sobresaliente</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:1rem;display:flex;justify-content:space-between;font-size:13px;font-weight:600;">
+          <span>Promedio general:</span><span class="cal-alta">8.87</span>
+        </div>
+        <div class="no-modificar">🔒 Documento de solo lectura — No se permite modificar la boleta</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENTREGAS -->
+<div class="modal-overlay" id="modal-entregas">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-entregas-titulo">Entregas de alumnos</h3>
+      <button class="modal-cerrar" onclick="document.getElementById('modal-entregas').classList.remove('abierto')">✕</button>
+    </div>
+    <div class="boleta-viewer"><div id="modal-entregas-body"></div></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  CATÁLOGOS FIJOS
+// ============================================================
+const GRUPOS_POR_GRADO = {
+  '1°': ['A','B','C'],
+  '2°': ['A','B','C'],
+  '3°': ['A','B','C'],
+};
+
+const MATERIAS_POR_GRADO = {
+  '1°': ['Matemáticas','Español','Ciencias Naturales','Historia','Geografía','Inglés','Tecnología','Educación Física','Formación Cívica'],
+  '2°': ['Matemáticas','Español','Física','Historia','Geografía','Inglés','Tecnología','Educación Física','Formación Cívica'],
+  '3°': ['Matemáticas','Español','Química','Historia','Geografía','Inglés','Tecnología','Educación Física','Formación Cívica'],
+};
+
+// ============================================================
+//  BASE DE DATOS EN MEMORIA
+// ============================================================
+const DB = {
+  alumnos: [
+    {id:1,nombre:'Juan García López',      curp:'GARJ090512HDFRZN08',pass:'est36alumno',grupo:'2° B',grado:'2°',activo:true},
+    {id:2,nombre:'Ana Bravo Soto',         curp:'BASA100305MDFRVN02',pass:'alumno123',  grupo:'2° B',grado:'2°',activo:true},
+    {id:3,nombre:'Carlos Cruz Ríos',       curp:'CURC091122HDFRZR04',pass:'alumno123',  grupo:'2° B',grado:'2°',activo:true},
+    {id:4,nombre:'Sofía Mendoza Herrera',  curp:'MEHS100814MDFNRS09',pass:'alumno123',  grupo:'2° A',grado:'2°',activo:true},
+    {id:5,nombre:'Diego Torres Leal',      curp:'TOLD091030HDFRRG07',pass:'alumno123',  grupo:'1° A',grado:'1°',activo:true},
+    {id:6,nombre:'Valeria Pérez Núñez',    curp:'PENV110220MDFRNL01',pass:'alumno123',  grupo:'3° B',grado:'3°',activo:false},
+  ],
+  docentes: [
+    {id:1,nombre:'María Ramírez Soto',     curp:'RASMS780615MDFMLN0',pass:'est36docente',materias:'Matemáticas, Física',activo:true},
+    {id:2,nombre:'Jorge Hernández Vega',   curp:'HEVJ750320HDFRGR02', pass:'docente123',  materias:'Español, Literatura',activo:true},
+    {id:3,nombre:'Patricia Vázquez Ruiz',  curp:'VARP800910MDFZTR08', pass:'docente123',  materias:'Tecnología',activo:true},
+    {id:4,nombre:'Roberto Torres Cisneros',curp:'TOCR770425HDFRRB06', pass:'docente123',  materias:'Ciencias Naturales',activo:true},
+  ],
+  administrativos: [
+    {id:1,nombre:'Carlos López Pérez',curp:'LOPC651020HDFPRL03',pass:'est36admin',area:'Control Escolar',activo:true},
+  ],
+  comunicados: [
+    {id:1,titulo:'Inicio del 3er Bimestre',tipo:'general',dirigido:'Todos',contenido:'Se informa que el tercer bimestre da inicio el próximo lunes 12 de mayo.',fecha:'08 May 2026',autor:'Dirección General'},
+    {id:2,titulo:'Festival del Día de la Madre',tipo:'evento',dirigido:'Todos',contenido:'Festival el viernes 9 de mayo a las 10:00 hrs en el auditorio.',fecha:'06 May 2026',autor:'Comisión Cultural'},
+    {id:3,titulo:'Suspensión de clases — 15 de mayo',tipo:'urgente',dirigido:'Todos',contenido:'No habrá clases el jueves 15 de mayo por Día del Maestro.',fecha:'05 May 2026',autor:'Dirección General'},
+  ],
+  actividades: [
+    {id:1,materia:'Matemáticas',grupo:'2° B',nombre:'Tarea: Ecuaciones cuadráticas pp. 78–82',tipo:'Tarea',fecha:'2026-05-14',instrucciones:'Resolver ejercicios 1 al 20. Mostrar procedimiento.',material:null,
+      entregas:{'GARJ090512HDFRZN08':{archivo:'tarea_mate_juan.pdf',fecha:'13 May 2026',retro:'',calificacion:''},'BASA100305MDFRVN02':null,'CURC091122HDFRZR04':{archivo:'ecuaciones_carlos.jpg',fecha:'13 May 2026',retro:'',calificacion:''}}},
+    {id:2,materia:'Física',grupo:'2° B',nombre:'Proyecto: Informe de práctica de laboratorio',tipo:'Proyecto',fecha:'2026-05-20',instrucciones:'Elaborar informe de práctica de péndulo simple.',material:'formato_informe.pdf',
+      entregas:{'GARJ090512HDFRZN08':null,'BASA100305MDFRVN02':null,'CURC091122HDFRZR04':null}},
+    {id:3,materia:'Matemáticas',grupo:'2° A',nombre:'Trabajo: Repaso de fracciones',tipo:'Trabajo en clase',fecha:'2026-05-12',instrucciones:'Completar cuaderno páginas 33–35.',material:null,
+      entregas:{'MEHS100814MDFNRS09':{archivo:'fracciones_sofia.pdf',fecha:'12 May 2026',retro:'Buen trabajo, revisa el ejercicio 5.',calificacion:'9.3'}}},
+  ],
+  mensajes: [],
+  periodoBoletas: false,
+  sesionActiva: null,
+  nextId: {alumno:7,docente:5,comunicado:4,actividad:4,mensaje:1},
+};
+
+// ============================================================
+//  AUTENTICACIÓN
+// ============================================================
+function detectarRolPorCurp(val) {
+  const curp=val.toUpperCase().trim();
+  const div=document.getElementById('login-detectado');
+  if(curp.length<10){div.style.display='none';return;}
+  const al=DB.alumnos.find(a=>a.curp===curp);
+  if(al){div.style.display='block';div.textContent=`👨‍🎓 Alumno: ${al.nombre} — ${al.grado} Grupo ${al.grupo}`;return;}
+  const doc=DB.docentes.find(d=>d.curp===curp);
+  if(doc){div.style.display='block';div.textContent=`📚 Docente: ${doc.nombre}`;return;}
+  const adm=DB.administrativos.find(a=>a.curp===curp);
+  if(adm){div.style.display='block';div.textContent=`🏫 Administrativo: ${adm.nombre}`;return;}
+  div.style.display='none';
+}
+
+function iniciarSesion() {
+  const curp=document.getElementById('login-correo').value.toUpperCase().trim();
+  const pass=document.getElementById('login-password').value.trim();
+  const errEl=document.getElementById('login-error');
+  if(!curp||!pass){mostrarError(errEl,'Ingresa tu CURP y contraseña.');return;}
+  const al=DB.alumnos.find(a=>a.curp===curp&&a.pass===pass);
+  if(al){if(!al.activo){mostrarError(errEl,'Tu cuenta está dada de baja. Contacta a Control Escolar.');return;}DB.sesionActiva={tipo:'alumno',datos:al};cargarPortalAlumno(al);mostrarPantalla('portal-alumno');return;}
+  const doc=DB.docentes.find(d=>d.curp===curp&&d.pass===pass);
+  if(doc){if(!doc.activo){mostrarError(errEl,'Tu cuenta está dada de baja.');return;}DB.sesionActiva={tipo:'docente',datos:doc};cargarPortalDocente(doc);mostrarPantalla('portal-docente');return;}
+  const adm=DB.administrativos.find(a=>a.curp===curp&&a.pass===pass);
+  if(adm){DB.sesionActiva={tipo:'admin',datos:adm};renderTablaAlumnosAdmin();renderTablaDocentesAdmin();renderComunicadosAdmin();renderCambioPass();mostrarPantalla('portal-admin');return;}
+  mostrarError(errEl,'CURP o contraseña incorrectos.');
+}
+
+function mostrarError(el,msg){el.textContent=msg;el.style.display='block';setTimeout(()=>{el.style.display='none';},4000);}
+
+function cerrarSesion(){
+  DB.sesionActiva=null;
+  document.getElementById('login-correo').value='';
+  document.getElementById('login-password').value='';
+  document.getElementById('login-detectado').style.display='none';
+  mostrarPantalla('login');
+}
+
+function togglePass(id,btn){const inp=document.getElementById(id);inp.type=inp.type==='password'?'text':'password';btn.textContent=inp.type==='password'?'👁':'🙈';}
+
+// ============================================================
+//  NAVEGACIÓN
+// ============================================================
+function mostrarPantalla(id){document.querySelectorAll('.pantalla').forEach(p=>p.classList.remove('activa'));document.getElementById(id).classList.add('activa');}
+function cambiarTab(id,btn){const p=btn.closest('.main-content');p.querySelectorAll('.seccion').forEach(s=>s.classList.remove('activa'));p.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('activo'));document.getElementById(id).classList.add('activa');btn.classList.add('activo');}
+function cambiarTabDoc(id,btn){const p=document.getElementById('portal-docente').querySelector('.main-content');p.querySelectorAll('.seccion').forEach(s=>s.classList.remove('activa'));p.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('activo'));document.getElementById(id).classList.add('activa');btn.classList.add('activo');}
+function cambiarAdminTab(id,btn){document.querySelectorAll('.admin-seccion').forEach(s=>s.classList.remove('activa'));document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('activo'));document.getElementById(id).classList.add('activa');btn.classList.add('activo');}
+
+// ============================================================
+//  PORTAL ALUMNO
+// ============================================================
+function cargarPortalAlumno(al) {
+  document.getElementById('avatar-alumno').textContent=al.nombre.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase();
+  document.getElementById('nombre-alumno').textContent=al.nombre;
+  document.getElementById('info-alumno').textContent=`Alumno • ${al.grado} Grado — Grupo ${al.grupo}`;
+  document.getElementById('badge-alumno').textContent='Alumno';
+  document.getElementById('boleta-nombre-alumno').textContent=al.nombre;
+  document.getElementById('boleta-curp-alumno').textContent=al.curp;
+  document.getElementById('boleta-grado-alumno').textContent=al.grupo;
+  renderComunicadosAlumno();renderTrabajosAlumno(al);renderBoletasAlumno();renderBuzonAlumno(al);
+  const sel=document.getElementById('msg-al-docente');
+  sel.innerHTML=DB.docentes.filter(d=>d.activo).map(d=>`<option value="${d.id}">${d.nombre}</option>`).join('');
+  const p=document.getElementById('portal-alumno');
+  p.querySelectorAll('.seccion').forEach(s=>s.classList.remove('activa'));
+  p.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('activo'));
+  document.getElementById('comunicados-a').classList.add('activa');
+  p.querySelectorAll('.tab-btn')[0].classList.add('activo');
+}
+
+function renderComunicadosAlumno(){document.getElementById('comunicados-a').innerHTML=DB.comunicados.slice().reverse().map(c=>`<div class="comunicado-card"><div class="com-header"><div><span class="tag-com tag-${c.tipo}">${cap(c.tipo)}</span><h3>${c.titulo}</h3></div><span class="com-fecha">${c.fecha}</span></div><p style="font-size:12px;color:var(--gris-sec);margin-bottom:6px;">Para: ${c.dirigido} | ${c.autor}</p><p>${c.contenido}</p></div>`).join('');}
+
+function renderBoletasAlumno() {
+  const msg=document.getElementById('boleta-periodo-msg');
+  const lista=document.getElementById('boletas-lista-alumno');
+  if(!DB.periodoBoletas){
+    msg.innerHTML=`<div class="boleta-bloqueada">🔒 <span>No estamos en periodo de boletas. Cuando el área administrativa lo habilite podrás consultarlas aquí.</span></div>`;
+    lista.innerHTML='';return;
+  }
+  msg.innerHTML=`<div class="boleta-bloqueada" style="background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20;">✅ <span>El periodo de boletas está activo. Puedes consultar tus boletas a continuación.</span></div>`;
+  lista.innerHTML=`
+    <div class="boleta-card"><div class="boleta-icono">📄</div><div class="boleta-info"><h3>Boleta de Calificaciones — 1er Bimestre</h3><p>Ciclo escolar 2025–2026 • 2° Grado Grupo B</p></div><button class="btn-ver-boleta" onclick="abrirBoleta()">Ver boleta</button></div>
+    <div class="boleta-card"><div class="boleta-icono">📄</div><div class="boleta-info"><h3>Boleta de Calificaciones — 2do Bimestre</h3><p>Ciclo escolar 2025–2026 • 2° Grado Grupo B</p></div><button class="btn-ver-boleta" onclick="abrirBoleta()">Ver boleta</button></div>`;
+}
+
+function renderTrabajosAlumno(al){
+  const cont=document.getElementById('lista-trabajos-alumno');
+  const trabajos=DB.actividades.filter(a=>a.grupo===al.grupo);
+  if(!trabajos.length){cont.innerHTML='<p style="font-size:14px;color:var(--gris-sec);">No hay asignaciones disponibles.</p>';return;}
+  cont.innerHTML=trabajos.map(t=>{
+    const e=t.entregas[al.curp];const ya=e!==null&&e!==undefined;
+    return `<div class="trabajo-card" id="tc-${t.id}">
+      <div class="trabajo-header">
+        <div><div class="materia">${t.materia} • ${t.tipo}</div><h3>${t.nombre}</h3></div>
+        <span class="estado-badge ${ya?'entregado':'pendiente'}" id="badge-${t.id}">${ya?'✓ Entregado':'⏳ Pendiente'}</span>
+      </div>
+      <div class="trabajo-body">
+        <p>${t.instrucciones}</p>
+        <p style="margin-top:6px;font-size:12px;color:var(--gris-sec);">📅 ${formatFecha(t.fecha)}${t.material?` &nbsp;|&nbsp; 📎 <span style="color:var(--azul);cursor:pointer;" onclick="alert('Material: ${t.material}')">Ver material</span>`:''}</p>
+        ${ya
+          ?`<div class="retro-box"><strong>✓ Entregado</strong>📎 ${e.archivo} — ${e.fecha}
+              ${e.calificacion?`<br><strong>📊 Calificación:</strong> ${e.calificacion}`:''}
+              ${e.retro?`<br><strong>💬 Retroalimentación:</strong> ${e.retro}`:''}</div>`
+          :`<div class="upload-trabajo"><label class="btn-upload-small" for="ft-${t.id}">📤 Subir archivo</label><input type="file" id="ft-${t.id}" accept=".pdf,.png,.jpg,.jpeg" style="display:none;" onchange="entregarTrabajo(${t.id},'${al.curp}',this)"><span style="font-size:12px;color:var(--gris-sec);">PDF, PNG o JPG</span></div>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function entregarTrabajo(actId,curp,input){
+  if(!input.files[0])return;
+  const archivo=input.files[0].name;const fecha=fechaHoy();
+  const act=DB.actividades.find(a=>a.id===actId);
+  if(act)act.entregas[curp]={archivo,fecha,retro:'',calificacion:''};
+  document.getElementById(`badge-${actId}`).className='estado-badge entregado';
+  document.getElementById(`badge-${actId}`).textContent='✓ Entregado';
+  const up=input.closest('.upload-trabajo');
+  if(up)up.outerHTML=`<div class="retro-box"><strong>✓ Entregado</strong>📎 ${archivo} — ${fecha}</div>`;
+}
+
+// ============================================================
+//  BUZÓN
+// ============================================================
+function enviarMensajeAlumno(){
+  const al=DB.sesionActiva.datos;
+  const docId=parseInt(document.getElementById('msg-al-docente').value);
+  const asunto=document.getElementById('msg-al-asunto').value.trim();
+  const texto=document.getElementById('msg-al-texto').value.trim();
+  if(!asunto||!texto){alert('Completa asunto y mensaje.');return;}
+  const doc=DB.docentes.find(d=>d.id===docId);
+  DB.mensajes.push({id:DB.nextId.mensaje++,de:al.nombre,deTipo:'alumno',deCurp:al.curp,para:doc.nombre,paraTipo:'docente',paraId:docId,asunto,texto,fecha:fechaHoy(),leido:false});
+  document.getElementById('msg-al-asunto').value='';document.getElementById('msg-al-texto').value='';
+  showOk('msg-al-ok');
+}
+
+function enviarMensajeDocente(){
+  const doc=DB.sesionActiva.datos;
+  const alCurp=document.getElementById('msg-doc-alumno').value;
+  const asunto=document.getElementById('msg-doc-asunto').value.trim();
+  const texto=document.getElementById('msg-doc-texto').value.trim();
+  if(!alCurp||!asunto||!texto){alert('Selecciona un alumno y completa asunto y mensaje.');return;}
+  const al=DB.alumnos.find(a=>a.curp===alCurp);
+  DB.mensajes.push({id:DB.nextId.mensaje++,de:doc.nombre,deTipo:'docente',deCurp:doc.curp,para:al.nombre,paraTipo:'alumno',paraCurp:alCurp,asunto,texto,fecha:fechaHoy(),leido:false});
+  document.getElementById('msg-doc-asunto').value='';document.getElementById('msg-doc-texto').value='';
+  showOk('msg-doc-ok');
+}
+
+function renderBuzonAlumno(al){
+  const cont=document.getElementById('buzon-al-recibidos');
+  const mens=DB.mensajes.filter(m=>m.paraTipo==='alumno'&&m.paraCurp===al.curp);
+  if(!mens.length){cont.innerHTML=`<div class="mensaje-vacio">📭 No tienes mensajes aún.</div>`;return;}
+  cont.innerHTML=mens.slice().reverse().map(m=>`
+    <div class="mensaje-card recibido">
+      <div class="mensaje-meta"><span class="mensaje-de">📨 De: ${m.de} — <strong>${m.asunto}</strong></span><span class="mensaje-fecha">${m.fecha}</span></div>
+      <p class="mensaje-texto">${m.texto}</p>
+    </div>`).join('');
+}
+
+function renderBuzonDocente(doc){
+  const cont=document.getElementById('buzon-doc-recibidos');
+  const mens=DB.mensajes.filter(m=>m.paraTipo==='docente'&&m.paraId===doc.id);
+  if(!mens.length){cont.innerHTML=`<div class="mensaje-vacio">📭 No tienes mensajes de alumnos aún.</div>`;return;}
+  cont.innerHTML=mens.slice().reverse().map(m=>`
+    <div class="mensaje-card recibido">
+      <div class="mensaje-meta"><span class="mensaje-de">📨 De: ${m.de} — <strong>${m.asunto}</strong></span><span class="mensaje-fecha">${m.fecha}</span></div>
+      <p class="mensaje-texto">${m.texto}</p>
+    </div>`).join('');
+}
+
+function cargarAlumnosSelect(){
+  const grupo=document.getElementById('msg-doc-grupo').value;
+  const sel=document.getElementById('msg-doc-alumno');
+  if(!grupo){sel.innerHTML='<option value="">— Selecciona grupo —</option>';return;}
+  const lista=DB.alumnos.filter(a=>a.grupo===grupo&&a.activo);
+  sel.innerHTML='<option value="">— Selecciona alumno —</option>'+lista.map(a=>`<option value="${a.curp}">${a.nombre}</option>`).join('');
+}
+
+// ============================================================
+//  PORTAL DOCENTE
+// ============================================================
+function cargarPortalDocente(doc){
+  document.getElementById('avatar-docente').textContent=doc.nombre.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase();
+  document.getElementById('nombre-docente').textContent=doc.nombre;
+  document.getElementById('info-docente').textContent=`Docente • ${doc.materias||'Sin materias asignadas'}`;
+  const sel=document.getElementById('act-materia');
+  sel.innerHTML='<option value="">— Selecciona materia —</option>';
+  if(doc.materias){doc.materias.split(',').forEach(m=>{const o=document.createElement('option');o.textContent=m.trim();sel.appendChild(o);});}
+  const grSel=document.getElementById('msg-doc-grupo');
+  const grupos=[...new Set(DB.alumnos.filter(a=>a.activo).map(a=>a.grupo))].sort();
+  grSel.innerHTML='<option value="">— Selecciona grupo —</option>'+grupos.map(g=>`<option>${g}</option>`).join('');
+  renderComunicadosDocente();renderActividadesDocente();renderBuzonDocente(doc);
+  const p=document.getElementById('portal-docente');
+  p.querySelectorAll('.seccion').forEach(s=>s.classList.remove('activa'));
+  p.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('activo'));
+  document.getElementById('comunicados-d').classList.add('activa');
+  p.querySelectorAll('.tab-btn')[0].classList.add('activo');
+}
+
+function renderComunicadosDocente(){document.getElementById('lista-comunicados-d').innerHTML=DB.comunicados.slice().reverse().map(c=>`<div class="comunicado-card"><div class="com-header"><div><span class="tag-com tag-${c.tipo}">${cap(c.tipo)}</span><h3>${c.titulo}</h3></div><span class="com-fecha">${c.fecha}</span></div><p style="font-size:12px;color:var(--gris-sec);margin-bottom:6px;">Para: ${c.dirigido} | ${c.autor}</p><p>${c.contenido}</p></div>`).join('');}
+
+function publicarComunicado(){
+  const titulo=document.getElementById('com-titulo').value.trim();
+  const tipo=document.getElementById('com-tipo').value;
+  const dirigido=document.getElementById('com-dirigido').value;
+  const contenido=document.getElementById('com-contenido').value.trim();
+  if(!titulo||!contenido){alert('Completa título y contenido.');return;}
+  DB.comunicados.push({id:DB.nextId.comunicado++,titulo,tipo,dirigido,contenido,fecha:fechaHoy(),autor:DB.sesionActiva.datos.nombre});
+  document.getElementById('com-titulo').value='';document.getElementById('com-contenido').value='';
+  showOk('com-exito');renderComunicadosDocente();renderComunicadosAlumno();renderComunicadosAdmin();
+}
+
+function renderActividadesDocente(){
+  const cont=document.getElementById('lista-actividades');
+  const doc=DB.sesionActiva?DB.sesionActiva.datos:null;
+  const mis=doc&&doc.materias?DB.actividades.filter(a=>doc.materias.toLowerCase().includes(a.materia.toLowerCase())):DB.actividades;
+  if(!mis.length){cont.innerHTML='<p style="font-size:14px;color:var(--gris-sec);">No hay asignaciones publicadas aún.</p>';return;}
+  cont.innerHTML=mis.map(a=>{
+    const total=Object.keys(a.entregas).length;
+    const entregaron=Object.values(a.entregas).filter(e=>e!==null).length;
+    return `<div class="asignacion-card">
+      <div class="asignacion-header">
+        <div><div class="materia">${a.materia} — ${a.grupo} • ${a.tipo}</div><h3>${a.nombre}</h3></div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font-size:12px;color:var(--gris-sec);">📅 ${formatFecha(a.fecha)}</span>
+          <span class="estado-badge entregado">${entregaron}/${total} entregas</span>
+          <button class="btn-upload-small" onclick="verEntregas(${a.id})">Ver entregas</button>
+        </div>
+      </div>
+      <div class="asignacion-body">
+        <p style="font-size:13px;color:var(--gris-sec);">${a.instrucciones}</p>
+        ${a.material?`<p style="font-size:12px;margin-top:6px;">📎 Material: <span style="color:var(--azul);">${a.material}</span></p>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function verEntregas(actId){
+  const act=DB.actividades.find(a=>a.id===actId);if(!act)return;
+  document.getElementById('modal-entregas-titulo').textContent=`Entregas — ${act.nombre}`;
+  const body=document.getElementById('modal-entregas-body');
+  body.innerHTML=`<p style="font-size:12px;color:var(--gris-sec);margin-bottom:1rem;">Puedes asignar calificación (con decimales) y retroalimentación para cada alumno.</p>`+
+  Object.entries(act.entregas).map(([curp,e])=>{
+    const al=DB.alumnos.find(a=>a.curp===curp);
+    const nombre=al?al.nombre:curp;
+    return `<div class="entrega-row">
+      <span class="entrega-alumno">${nombre}</span>
+      ${e
+        ?`<span class="entrega-archivo">📎 ${e.archivo}</span>
+          <span style="font-size:12px;color:var(--gris-sec);">${e.fecha}</span>
+          <input type="number" step="0.1" min="0" max="10" class="cal-input" placeholder="Cal." value="${e.calificacion||''}"
+            onchange="guardarCalificacion(${actId},'${curp}',this.value)">
+          <input type="text" placeholder="Retroalimentación..." value="${e.retro||''}"
+            onchange="guardarRetro(${actId},'${curp}',this.value)"
+            style="border:1.5px solid var(--gris-borde);border-radius:6px;padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;min-width:160px;outline:none;"
+            onfocus="this.style.borderColor='var(--primario)'" onblur="this.style.borderColor='var(--gris-borde)'">`
+        :`<span class="entrega-sin">Sin entrega</span>`
+      }
+    </div>`;
+  }).join('')||'<p style="color:var(--gris-sec);">Sin alumnos registrados.</p>';
+  document.getElementById('modal-entregas').classList.add('abierto');
+}
+
+function guardarCalificacion(actId,curp,val){
+  const act=DB.actividades.find(a=>a.id===actId);
+  if(act&&act.entregas[curp])act.entregas[curp].calificacion=val;
+  if(DB.sesionActiva&&DB.sesionActiva.tipo==='alumno')renderTrabajosAlumno(DB.sesionActiva.datos);
+}
+
+function guardarRetro(actId,curp,val){
+  const act=DB.actividades.find(a=>a.id===actId);
+  if(act&&act.entregas[curp]){act.entregas[curp].retro=val;if(DB.sesionActiva&&DB.sesionActiva.tipo==='alumno')renderTrabajosAlumno(DB.sesionActiva.datos);}
+}
+
+function guardarActividad(){
+  const materia=document.getElementById('act-materia').value;
+  const grupo=document.getElementById('act-grupo').value;
+  const nombre=document.getElementById('act-nombre').value.trim();
+  const tipo=document.getElementById('act-tipo').value;
+  const fecha=document.getElementById('act-fecha').value;
+  const instrucciones=document.getElementById('act-instrucciones').value.trim();
+  if(!materia||!nombre||!fecha){alert('Completa: materia, nombre y fecha límite.');return;}
+  const entregas={};
+  DB.alumnos.filter(a=>a.grupo===grupo&&a.activo).forEach(a=>{entregas[a.curp]=null;});
+  DB.actividades.push({id:DB.nextId.actividad++,materia,grupo,nombre,tipo,fecha,instrucciones,material:window._materialSeleccionado||null,entregas});
+  window._materialSeleccionado=null;
+  limpiarActividad();showOk('act-exito');renderActividadesDocente();
+}
+
+function limpiarActividad(){
+  ['act-nombre','act-fecha','act-instrucciones'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('act-materia').selectedIndex=0;
+  document.getElementById('act-tipo').selectedIndex=0;
+  document.getElementById('material-sel-nombre').textContent='';
+  window._materialSeleccionado=null;
+}
+
+function materialSeleccionado(input){if(input.files[0]){window._materialSeleccionado=input.files[0].name;document.getElementById('material-sel-nombre').textContent='📎 '+input.files[0].name;}}
+
+// ============================================================
+//  BOLETAS
+// ============================================================
+function togglePeriodo(){
+  DB.periodoBoletas=!DB.periodoBoletas;
+  document.getElementById('periodo-texto').textContent=DB.periodoBoletas?'✅ Activo':'No activo';
+  document.getElementById('btn-toggle-periodo').textContent=DB.periodoBoletas?'Desactivar periodo':'Activar periodo';
+  if(DB.sesionActiva&&DB.sesionActiva.tipo==='alumno')renderBoletasAlumno();
+}
+
+function actualizarGruposBoleta(){
+  const grado=document.getElementById('bol-grado').value;
+  const sel=document.getElementById('bol-grupo');
+  if(!grado||!GRUPOS_POR_GRADO[grado]){sel.innerHTML='<option value="">— Selecciona grado —</option>';return;}
+  sel.innerHTML=GRUPOS_POR_GRADO[grado].map(g=>`<option value="${grado} ${g}">${grado} ${g}</option>`).join('');
+}
+
+function archivoSeleccionado(input){if(input.files[0])document.getElementById('archivo-sel').textContent='📄 '+input.files[0].name;}
+
+function subirBoleta(){
+  const fi=document.getElementById('file-input');
+  if(!fi.files[0]){alert('Selecciona un archivo PDF primero.');return;}
+  const grupo=document.getElementById('bol-grupo').value;
+  const bimestre=document.getElementById('bol-bimestre').value;
+  if(!grupo){alert('Selecciona grado y grupo.');return;}
+  const item=document.createElement('div');item.className='pdf-item';
+  item.innerHTML=`<span class="pdf-icono">📄</span><span class="pdf-nombre">Boleta ${bimestre} — ${grupo}</span><span class="pdf-fecha">Subida: ${fechaHoy()}</span><button class="btn-quitar" onclick="quitarPdf(this)">Quitar</button>`;
+  document.getElementById('lista-pdfs').appendChild(item);
+  document.getElementById('archivo-sel').textContent='';fi.value='';showOk('bol-exito');
+}
+
+function quitarPdf(btn){if(confirm('¿Confirmas eliminar esta boleta?'))btn.closest('.pdf-item').remove();}
+
+function abrirBoleta(){
+  if(DB.sesionActiva){
+    document.getElementById('boleta-nombre-alumno').textContent=DB.sesionActiva.datos.nombre;
+    document.getElementById('boleta-curp-alumno').textContent=DB.sesionActiva.datos.curp;
+    document.getElementById('boleta-grado-alumno').textContent=DB.sesionActiva.datos.grupo;
+  }
+  document.getElementById('modal-boleta').classList.add('abierto');
+}
+function cerrarModal(){document.getElementById('modal-boleta').classList.remove('abierto');}
+
+// ============================================================
+//  ADMIN — ALUMNOS
+// ============================================================
+function actualizarGruposAlumno(){
+  const grado=document.getElementById('al-grado').value;
+  const sel=document.getElementById('al-grupo');
+  if(!grado||!GRUPOS_POR_GRADO[grado]){sel.innerHTML='<option value="">— Selecciona grado primero —</option>';return;}
+  sel.innerHTML=GRUPOS_POR_GRADO[grado].map(g=>`<option value="${grado} ${g}">${g}</option>`).join('');
+}
+
+function renderTablaAlumnosAdmin(){
+  document.getElementById('tbody-alumnos-admin').innerHTML=DB.alumnos.map((a,i)=>`
+    <tr><td>${i+1}</td><td>${a.nombre}</td><td style="font-size:11px;font-family:monospace;">${a.curp}</td>
+    <td>${a.grupo}</td>
+    <td><span class="${a.activo?'badge-activo':'badge-baja'}">${a.activo?'Activo':'Baja'}</span></td>
+    <td><button class="btn-accion ${a.activo?'danger':'ok'}" style="font-size:12px;padding:6px 12px;" onclick="toggleEstadoAlumno(${a.id})">${a.activo?'Dar de baja':'Reactivar'}</button></td>
+    </tr>`).join('');
+}
+
+function altaAlumno(){
+  const nombre=document.getElementById('al-nombre').value.trim();
+  const apellidos=document.getElementById('al-apellidos').value.trim();
+  const curp=document.getElementById('al-curp').value.toUpperCase().trim();
+  const grupo=document.getElementById('al-grupo').value;
+  const pass=document.getElementById('al-pass').value.trim();
+  const grado=document.getElementById('al-grado').value;
+  const ok=document.getElementById('alta-alumno-ok');
+  if(!nombre||!apellidos||!curp||!pass||!grado||!grupo){showMsg(ok,'error','Completa todos los campos.');return;}
+  if(curp.length!==18){showMsg(ok,'error','La CURP debe tener exactamente 18 caracteres.');return;}
+  if(DB.alumnos.find(a=>a.curp===curp)||DB.docentes.find(d=>d.curp===curp)){showMsg(ok,'error','Esa CURP ya está registrada.');return;}
+  if(pass.length<6){showMsg(ok,'error','Contraseña mínimo 6 caracteres.');return;}
+  const nuevo={id:DB.nextId.alumno++,nombre:`${nombre} ${apellidos}`,curp,pass,grupo,grado,activo:true};
+  DB.alumnos.push(nuevo);
+  ['al-nombre','al-apellidos','al-curp','al-pass'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('al-grado').value='';document.getElementById('al-grupo').innerHTML='<option>— Selecciona grado primero —</option>';
+  showMsg(ok,'exito',`✓ Alumno ${nuevo.nombre} registrado. CURP: ${curp}`);
+  renderTablaAlumnosAdmin();renderCambioPass();
+}
+
+function toggleEstadoAlumno(id){
+  const al=DB.alumnos.find(a=>a.id===id);if(!al)return;
+  if(!confirm(`¿Confirmas ${al.activo?'dar de baja':'reactivar'} a ${al.nombre}?`))return;
+  al.activo=!al.activo;renderTablaAlumnosAdmin();renderCambioPass();
+}
+
+// ============================================================
+//  ADMIN — DOCENTES — CAMBIO 3: alta sin campo de materias
+// ============================================================
+function renderTablaDocentesAdmin(){
+  document.getElementById('tbody-docentes-admin').innerHTML=DB.docentes.map((d,i)=>`
+    <tr><td>${i+1}</td><td>${d.nombre}</td><td style="font-size:11px;font-family:monospace;">${d.curp}</td>
+    <td style="font-size:12px;">${d.materias||'<span style="color:var(--gris-sec);font-style:italic;">Sin asignar</span>'}</td>
+    <td><span class="${d.activo?'badge-activo':'badge-baja'}">${d.activo?'Activo':'Baja'}</span></td>
+    <td><button class="btn-accion ${d.activo?'danger':'ok'}" style="font-size:12px;padding:6px 12px;" onclick="toggleEstadoDocente(${d.id})">${d.activo?'Dar de baja':'Reactivar'}</button></td>
+    </tr>`).join('');
+}
+
+function altaDocente(){
+  const nombre=document.getElementById('doc-nombre').value.trim();
+  const apellidos=document.getElementById('doc-apellidos').value.trim();
+  const curp=document.getElementById('doc-curp').value.toUpperCase().trim();
+  const pass=document.getElementById('doc-pass').value.trim();
+  const ok=document.getElementById('alta-docente-ok');
+  // CAMBIO 3: ya no se pide el campo de materias al registrar
+  if(!nombre||!apellidos||!curp||!pass){showMsg(ok,'error','Completa todos los campos.');return;}
+  if(curp.length!==18){showMsg(ok,'error','CURP debe tener 18 caracteres.');return;}
+  if(DB.alumnos.find(a=>a.curp===curp)||DB.docentes.find(d=>d.curp===curp)){showMsg(ok,'error','Esa CURP ya está registrada.');return;}
+  if(pass.length<6){showMsg(ok,'error','Contraseña mínimo 6 caracteres.');return;}
+  // Se registra sin materias; se asignan desde Mat./Grupo
+  const nuevo={id:DB.nextId.docente++,nombre:`${nombre} ${apellidos}`,curp,pass,materias:'',activo:true};
+  DB.docentes.push(nuevo);
+  ['doc-nombre','doc-apellidos','doc-curp','doc-pass'].forEach(id=>document.getElementById(id).value='');
+  showMsg(ok,'exito',`✓ Docente ${nuevo.nombre} registrado. Asígnale materias en 📋 Mat./Grupo.`);
+  renderTablaDocentesAdmin();renderCambioPass();renderMateriasGrupo();
+}
+
+function toggleEstadoDocente(id){
+  const doc=DB.docentes.find(d=>d.id===id);if(!doc)return;
+  if(!confirm(`¿Confirmas ${doc.activo?'dar de baja':'reactivar'} a ${doc.nombre}?`))return;
+  doc.activo=!doc.activo;renderTablaDocentesAdmin();renderCambioPass();renderMateriasGrupo();
+}
+
+// ============================================================
+//  CAMBIO DE CONTRASEÑA
+// ============================================================
+function renderCambioPass(){
+  const cont=document.getElementById('pass-alumnos-lista');
+  const grupos=[...new Set(DB.alumnos.map(a=>a.grupo))].sort();
+  cont.innerHTML=grupos.map(g=>{
+    const miembros=DB.alumnos.filter(a=>a.grupo===g);
+    return `<div class="grupo-separador">Grupo ${g}</div>${miembros.map(al=>`
+      <div class="pass-row">
+        <div style="min-width:180px;"><div class="pass-nombre">${al.nombre}</div><div class="pass-curp">${al.curp}</div></div>
+        <span class="${al.activo?'badge-activo':'badge-baja'}" style="flex-shrink:0;">${al.activo?'Activo':'Baja'}</span>
+        <input class="pass-input" type="text" id="npass-al-${al.id}" placeholder="Nueva contraseña" ${!al.activo?'disabled':''}>
+        <button class="btn-pass" onclick="cambiarPassAlumno(${al.id})" ${!al.activo?'disabled':''}>Guardar</button>
+      </div>`).join('')}`;
+  }).join('');
+  document.getElementById('pass-docentes-lista').innerHTML=DB.docentes.map(doc=>`
+    <div class="pass-row">
+      <div style="min-width:180px;"><div class="pass-nombre">${doc.nombre}</div><div class="pass-curp">${doc.curp}</div></div>
+      <span class="${doc.activo?'badge-activo':'badge-baja'}" style="flex-shrink:0;">${doc.activo?'Activo':'Baja'}</span>
+      <input class="pass-input" type="text" id="npass-doc-${doc.id}" placeholder="Nueva contraseña" ${!doc.activo?'disabled':''}>
+      <button class="btn-pass" onclick="cambiarPassDocente(${doc.id})" ${!doc.activo?'disabled':''}>Guardar</button>
+    </div>`).join('');
+}
+
+function cambiarPassAlumno(id){
+  const inp=document.getElementById(`npass-al-${id}`);const nueva=inp.value.trim();
+  if(nueva.length<6){alert('Mínimo 6 caracteres.');return;}
+  const al=DB.alumnos.find(a=>a.id===id);if(!al)return;
+  al.pass=nueva;inp.value='';showMsg(document.getElementById('ok-pass-alumno'),'exito',`✓ Contraseña de ${al.nombre} actualizada.`);
+}
+
+function cambiarPassDocente(id){
+  const inp=document.getElementById(`npass-doc-${id}`);const nueva=inp.value.trim();
+  if(nueva.length<6){alert('Mínimo 6 caracteres.');return;}
+  const doc=DB.docentes.find(d=>d.id===id);if(!doc)return;
+  doc.pass=nueva;inp.value='';showMsg(document.getElementById('ok-pass-docente'),'exito',`✓ Contraseña de ${doc.nombre} actualizada.`);
+}
+
+// ============================================================
+//  CAMBIO MATERIA/GRUPO — CAMBIO 4: confirmación al asignar
+// ============================================================
+function actualizarGruposMateria(){
+  const grado=document.getElementById('mat-grado').value;
+  const sel=document.getElementById('mat-grupo');
+  document.getElementById('materia-docentes-lista').innerHTML='';
+  if(!grado||!GRUPOS_POR_GRADO[grado]){sel.innerHTML='<option value="">— Selecciona grupo —</option>';return;}
+  sel.innerHTML='<option value="">— Selecciona grupo —</option>'+GRUPOS_POR_GRADO[grado].map(g=>`<option value="${grado} ${g}">${g}</option>`).join('');
+}
+
+function renderMateriasGrupo(){
+  const grado=document.getElementById('mat-grado').value;
+  const grupo=document.getElementById('mat-grupo').value;
+  const cont=document.getElementById('materia-docentes-lista');
+  if(!grado||!grupo){cont.innerHTML='';return;}
+  const materias=MATERIAS_POR_GRADO[grado]||[];
+  const docentesActivos=DB.docentes.filter(d=>d.activo);
+  cont.innerHTML=`<p style="font-size:13px;color:var(--gris-sec);margin-bottom:1rem;">Asigna un docente a cada materia del <strong>${grupo}</strong>. Al cambiar la selección se pedirá confirmación.</p>`+
+  materias.map((mat,i)=>{
+    const asignado=DB.docentes.find(d=>d.activo&&d.materias&&d.materias.toLowerCase().includes(mat.toLowerCase()));
+    return `<div class="materia-row">
+      <div class="materia-nombre"><strong>${mat}</strong></div>
+      <select class="materia-sel" id="asig-${i}"
+        onchange="confirmarAsignacionMateria('${mat}',this)">
+        <option value="">— Sin docente asignado —</option>
+        ${docentesActivos.map(d=>`<option value="${d.id}" ${asignado&&asignado.id===d.id?'selected':''}>${d.nombre}</option>`).join('')}
+      </select>
+      ${asignado?`<span style="font-size:11px;color:var(--verde);font-weight:600;">✓ ${asignado.nombre}</span>`:''}
+    </div>`;
+  }).join('');
+}
+
+// CAMBIO 4: pide confirmación antes de guardar la asignación
+function confirmarAsignacionMateria(materia, selectEl) {
+  const docId = selectEl.value;
+  if(!docId) return; // seleccionó "sin docente"
+
+  const doc = DB.docentes.find(d=>d.id===parseInt(docId));
+  if(!doc) return;
+
+  // Buscar si ya había un docente asignado a esa materia
+  const anterior = DB.docentes.find(d=>d.materias&&d.materias.toLowerCase().includes(materia.toLowerCase()));
+  let mensaje = '';
+  if(anterior && anterior.id !== doc.id) {
+    mensaje = `¿Confirmas reasignar "${materia}" de ${anterior.nombre} → ${doc.nombre}?`;
+  } else {
+    mensaje = `¿Confirmas asignar "${materia}" a ${doc.nombre}?`;
+  }
+
+  if(!confirm(mensaje)) {
+    // Revertir el combobox al valor anterior
+    if(anterior) {
+      selectEl.value = anterior.id;
+    } else {
+      selectEl.value = '';
+    }
+    return;
+  }
+
+  // Si había un docente anterior, quitar la materia de su lista
+  if(anterior && anterior.id !== doc.id) {
+    anterior.materias = anterior.materias.split(',').map(m=>m.trim()).filter(m=>m.toLowerCase()!==materia.toLowerCase()).join(', ');
+  }
+
+  // Agregar materia al docente seleccionado si no la tiene
+  const lista = doc.materias ? doc.materias.split(',').map(m=>m.trim()).filter(Boolean) : [];
+  if(!lista.map(m=>m.toLowerCase()).includes(materia.toLowerCase())) {
+    lista.push(materia);
+    doc.materias = lista.join(', ');
+  }
+
+  renderTablaDocentesAdmin();
+  // Actualizar info del docente si está en sesión
+  if(DB.sesionActiva&&DB.sesionActiva.tipo==='docente'&&DB.sesionActiva.datos.id===doc.id) {
+    DB.sesionActiva.datos.materias=doc.materias;
+    document.getElementById('info-docente').textContent=`Docente • ${doc.materias}`;
+  }
+
+  showMsg(document.getElementById('ok-materia'),'exito',`✓ "${materia}" asignada a ${doc.nombre}.`);
+  // Re-renderizar para actualizar las etiquetas de confirmación
+  renderMateriasGrupo();
+}
+
+// ============================================================
+//  COMUNICADOS ADMIN
+// ============================================================
+function renderComunicadosAdmin(){
+  const cont=document.getElementById('lista-com-admin');
+  if(!cont)return;
+  cont.innerHTML=DB.comunicados.slice().reverse().map(c=>`<div class="comunicado-card"><div class="com-header"><div><span class="tag-com tag-${c.tipo}">${cap(c.tipo)}</span><h3>${c.titulo}</h3></div><span class="com-fecha">${c.fecha}</span></div><p style="font-size:12px;color:var(--gris-sec);margin-bottom:6px;">Para: ${c.dirigido} | ${c.autor}</p><p>${c.contenido}</p></div>`).join('');
+}
+
+function publicarComunicadoAdmin(){
+  const titulo=document.getElementById('com-admin-titulo').value.trim();
+  const tipo=document.getElementById('com-admin-tipo').value;
+  const dirigido=document.getElementById('com-admin-dirigido').value;
+  const contenido=document.getElementById('com-admin-contenido').value.trim();
+  if(!titulo||!contenido){alert('Completa título y contenido.');return;}
+  DB.comunicados.push({id:DB.nextId.comunicado++,titulo,tipo,dirigido,contenido,fecha:fechaHoy(),autor:'Control Escolar'});
+  document.getElementById('com-admin-titulo').value='';document.getElementById('com-admin-contenido').value='';
+  showOk('com-admin-ok');renderComunicadosAdmin();renderComunicadosAlumno();renderComunicadosDocente();
+}
+
+// ============================================================
+//  UTILIDADES
+// ============================================================
+function fechaHoy(){return new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});}
+function formatFecha(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return`${d} ${M[parseInt(m)-1]} ${y}`;}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function showOk(id){const el=document.getElementById(id);if(!el)return;el.style.display='block';setTimeout(()=>{el.style.display='none';},3000);}
+function showMsg(el,tipo,msg){el.className=`alerta ${tipo==='exito'?'exito':'error-msg'}`;el.textContent=msg;el.style.display='block';setTimeout(()=>{el.style.display='none';},4000);}
+
+document.getElementById('modal-boleta').addEventListener('click',function(e){if(e.target===this)cerrarModal();});
+document.getElementById('modal-entregas').addEventListener('click',function(e){if(e.target===this)this.classList.remove('abierto');});
+document.getElementById('login-password').addEventListener('keydown',function(e){if(e.key==='Enter')iniciarSesion();});
+// ============================================================
+//  APROVECHAMIENTO — LÓGICA COMPARTIDA
+// ============================================================
+function calcularAprovechamiento(alumno) {
+  const acts = DB.actividades.filter(a => a.grupo === alumno.grupo);
+  if (!acts.length) return { pct: 0, entregadas: 0, total: 0, acts: [] };
+  const total = acts.length;
+  let entregadas = 0;
+  const detalle = acts.map(a => {
+    const e = a.entregas[alumno.curp];
+    const entrego = e !== null && e !== undefined;
+    if (entrego) entregadas++;
+    return {
+      nombre: a.nombre, materia: a.materia, tipo: a.tipo, fecha: a.fecha,
+      entrego, archivo: e ? e.archivo : null,
+      calificacion: e ? e.calificacion : '', retro: e ? e.retro : ''
+    };
+  });
+  const pct = Math.round((entregadas / total) * 100);
+  return { pct, entregadas, total, acts: detalle };
+}
+
+function estatusAprov(pct) {
+  if (pct >= 100) return { clase: 'regular',  icono: '🟢', texto: 'Regular — Al corriente', color: 'verde' };
+  if (pct >= 70)  return { clase: 'posible',  icono: '🟡', texto: 'Posible rezago',         color: 'amarillo' };
+  return               { clase: 'rezagado', icono: '🔴', texto: 'Rezagado',               color: 'rojo' };
+}
+
+function semColor(alumno) {
+  const { pct } = calcularAprovechamiento(alumno);
+  if (pct >= 100) return 'aprov-sem-verde';
+  if (pct >= 70)  return 'aprov-sem-amarillo';
+  return 'aprov-sem-rojo';
+}
+
+function renderDetalleAlumno(alumno, contenedorId) {
+  const { pct, entregadas, total, acts } = calcularAprovechamiento(alumno);
+  const estatus = estatusAprov(pct);
+  const iniciales = alumno.nombre.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase();
+  const colorNum = pct < 70 ? 'var(--primario)' : pct < 100 ? 'var(--amarillo, #B45309)' : '#2D6A0A';
+
+  document.getElementById(contenedorId).innerHTML = `
+    <div class="aprov-detalle-header">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="aprov-alumno-avatar" style="width:44px;height:44px;font-size:15px;">${iniciales}</div>
+        <div>
+          <h3>${alumno.nombre}</h3>
+          <p>${alumno.grado} — Grupo ${alumno.grupo} &nbsp;|&nbsp; CURP: ${alumno.curp}</p>
+        </div>
+      </div>
+      <span class="aprov-estatus ${estatus.clase}" style="margin-top:10px;display:inline-flex;">
+        ${estatus.icono} ${estatus.texto}
+      </span>
+    </div>
+    <div class="aprov-stats">
+      <div class="aprov-stat"><div class="aprov-stat-num">${total}</div><div class="aprov-stat-label">Actividades totales</div></div>
+      <div class="aprov-stat"><div class="aprov-stat-num" style="color:#2D6A0A;">${entregadas}</div><div class="aprov-stat-label">Entregadas</div></div>
+      <div class="aprov-stat"><div class="aprov-stat-num" style="color:${colorNum};">${pct}%</div><div class="aprov-stat-label">Cumplimiento</div></div>
+    </div>
+    <div class="aprov-barra-wrap">
+      <div class="aprov-barra-label"><span>Entrega de actividades</span><span>${pct}%</span></div>
+      <div class="aprov-barra-bg"><div class="aprov-barra-fill ${estatus.color}" style="width:${pct}%;"></div></div>
+    </div>
+    <div style="padding:0 1.5rem 1.5rem;">
+      ${total === 0
+        ? '<p style="color:var(--gris-sec);font-size:14px;text-align:center;padding:1rem;">No hay actividades registradas para este grupo.</p>'
+        : `<table class="aprov-tabla">
+            <thead><tr>
+              <th>Actividad</th><th>Materia</th><th>Tipo</th>
+              <th>Fecha</th><th>Entregó</th><th>Calificación</th><th>Retroalimentación</th>
+            </tr></thead>
+            <tbody>
+              ${acts.map(a => `
+                <tr>
+                  <td style="font-weight:500;">${a.nombre}</td>
+                  <td>${a.materia}</td>
+                  <td style="font-size:12px;color:var(--gris-sec);">${a.tipo}</td>
+                  <td style="font-size:12px;color:var(--gris-sec);">${formatFecha(a.fecha)}</td>
+                  <td><span class="aprov-chip ${a.entrego?'si':'no'}">${a.entrego?'✓ Sí':'✗ No'}</span></td>
+                  <td>${a.calificacion
+                    ? `<span class="aprov-chip cal">${a.calificacion}</span>`
+                    : `<span class="aprov-chip sin-cal">—</span>`}</td>
+                  <td style="font-size:12px;color:var(--gris-sec);">${a.retro||'—'}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>`}
+    </div>`;
+}
+
+// ============================================================
+//  APROVECHAMIENTO — DOCENTE
+// ============================================================
+function initAprovDocente() {
+  const doc = DB.sesionActiva ? DB.sesionActiva.datos : null;
+  if (!doc) return;
+  const grupos = [...new Set(
+    DB.actividades
+      .filter(a => doc.materias && doc.materias.toLowerCase().includes(a.materia.toLowerCase()))
+      .map(a => a.grupo)
+  )].sort();
+  const sel = document.getElementById('aprov-doc-grupo');
+  sel.innerHTML = '<option value="">— Selecciona grupo —</option>' +
+    grupos.map(g => `<option>${g}</option>`).join('');
+  document.getElementById('aprov-doc-lista-alumnos').innerHTML = '<div class="aprov-vacio">Selecciona un grupo</div>';
+  document.getElementById('aprov-doc-detalle').innerHTML = '<div class="aprov-vacio">👈 Selecciona un alumno para ver su historial</div>';
+}
+
+function cargarAlumnosAprovDoc() {
+  const grupo = document.getElementById('aprov-doc-grupo').value;
+  const lista = document.getElementById('aprov-doc-lista-alumnos');
+  const detalle = document.getElementById('aprov-doc-detalle');
+  detalle.innerHTML = '<div class="aprov-vacio">👈 Selecciona un alumno para ver su historial</div>';
+  if (!grupo) { lista.innerHTML = '<div class="aprov-vacio">Selecciona un grupo</div>'; return; }
+  const alumnos = DB.alumnos.filter(a => a.grupo === grupo && a.activo);
+  if (!alumnos.length) { lista.innerHTML = '<div class="aprov-vacio">No hay alumnos activos en este grupo.</div>'; return; }
+  lista.innerHTML = alumnos.map(al => {
+    const sem = semColor(al);
+    const { pct } = calcularAprovechamiento(al);
+    return `<div class="aprov-alumno-item" id="aprov-item-doc-${al.id}" onclick="selAlumnoDoc(${al.id})">
+      <div class="aprov-alumno-avatar">${al.nombre.split(' ').slice(0,2).map(p=>p[0]).join('')}</div>
+      <div class="aprov-alumno-info">
+        <div class="aprov-alumno-nombre">${al.nombre}</div>
+        <div class="aprov-alumno-grupo">${pct}% cumplimiento</div>
+      </div>
+      <div class="aprov-semaforo ${sem}"></div>
+    </div>`;
+  }).join('');
+}
+
+function selAlumnoDoc(id) {
+  document.querySelectorAll('[id^="aprov-item-doc-"]').forEach(el => el.classList.remove('activo'));
+  document.getElementById(`aprov-item-doc-${id}`).classList.add('activo');
+  const al = DB.alumnos.find(a => a.id === id);
+  if (al) renderDetalleAlumno(al, 'aprov-doc-detalle');
+}
+
+// ============================================================
+//  APROVECHAMIENTO — ALUMNO (personal)
+// ============================================================
+function initAprovAlumno() {
+  const al = DB.sesionActiva ? DB.sesionActiva.datos : null;
+  if (!al) return;
+
+  const { pct, entregadas, total, acts } = calcularAprovechamiento(al);
+  const estatus = estatusAprov(pct);
+  const iniciales = al.nombre.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase();
+  const colorNum = pct < 70 ? 'var(--primario)' : pct < 100 ? '#B45309' : '#2D6A0A';
+
+  // Resumen personal
+  document.getElementById('aprov-alumno-resumen').innerHTML = `
+    <div class="aprov-detalle" style="margin-bottom:1.5rem;">
+      <div class="aprov-detalle-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="aprov-alumno-avatar" style="width:44px;height:44px;font-size:15px;">${iniciales}</div>
+          <div>
+            <h3>${al.nombre}</h3>
+            <p>${al.grado} — Grupo ${al.grupo} &nbsp;|&nbsp; CURP: ${al.curp}</p>
+          </div>
+        </div>
+        <span class="aprov-estatus ${estatus.clase}" style="margin-top:10px;display:inline-flex;">
+          ${estatus.icono} ${estatus.texto}
+        </span>
+      </div>
+      <div class="aprov-stats">
+        <div class="aprov-stat">
+          <div class="aprov-stat-num">${total}</div>
+          <div class="aprov-stat-label">Actividades totales</div>
+        </div>
+        <div class="aprov-stat">
+          <div class="aprov-stat-num" style="color:#2D6A0A;">${entregadas}</div>
+          <div class="aprov-stat-label">Entregadas</div>
+        </div>
+        <div class="aprov-stat">
+          <div class="aprov-stat-num" style="color:${colorNum};">${pct}%</div>
+          <div class="aprov-stat-label">Cumplimiento</div>
+        </div>
+      </div>
+      <div class="aprov-barra-wrap">
+        <div class="aprov-barra-label"><span>Entrega de actividades</span><span>${pct}%</span></div>
+        <div class="aprov-barra-bg">
+          <div class="aprov-barra-fill ${estatus.color}" style="width:${pct}%;"></div>
+        </div>
+      </div>
+    </div>`;
+
+  // Tabla detallada
+  document.getElementById('aprov-alumno-detalle').innerHTML = total === 0
+    ? `<div class="form-card"><p style="color:var(--gris-sec);font-size:14px;text-align:center;padding:1rem;">No hay actividades registradas para tu grupo aún.</p></div>`
+    : `<div class="form-card" style="padding:0;overflow:hidden;">
+        <table class="aprov-tabla">
+          <thead><tr>
+            <th>Actividad</th>
+            <th>Materia</th>
+            <th>Tipo</th>
+            <th>Fecha límite</th>
+            <th>Entregaste</th>
+            <th>Calificación</th>
+            <th>Retroalimentación</th>
+          </tr></thead>
+          <tbody>
+            ${acts.map(a => `
+              <tr>
+                <td style="font-weight:500;">${a.nombre}</td>
+                <td>${a.materia}</td>
+                <td style="font-size:12px;color:var(--gris-sec);">${a.tipo}</td>
+                <td style="font-size:12px;color:var(--gris-sec);">${formatFecha(a.fecha)}</td>
+                <td><span class="aprov-chip ${a.entrego?'si':'no'}">${a.entrego?'✓ Sí':'✗ No'}</span></td>
+                <td>${a.calificacion
+                  ? `<span class="aprov-chip cal">${a.calificacion}</span>`
+                  : `<span class="aprov-chip sin-cal">—</span>`}</td>
+                <td style="font-size:12px;color:var(--gris-sec);">${a.retro||'—'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+}
+
+// ============================================================
+//  APROVECHAMIENTO — ADMIN
+// ============================================================
+function initAprovAdmin() {
+  const cont = document.getElementById('aprov-admin-grupos-lista');
+  const grupos = [...new Set(DB.alumnos.filter(a => a.activo).map(a => a.grupo))].sort();
+  if (!grupos.length) { cont.innerHTML = '<div class="aprov-vacio">Sin grupos registrados.</div>'; return; }
+  cont.innerHTML = grupos.map(g => {
+    const alumnos = DB.alumnos.filter(a => a.grupo === g && a.activo);
+    const rezagados = alumnos.filter(a => calcularAprovechamiento(a).pct < 70).length;
+    const gid = g.replace(/[° ]/g, '_');
+    return `<div class="aprov-grupo-item" id="aprov-gitem-${gid}" onclick="selGrupoAdmin('${g}')">
+      <span>${g}</span>
+      <span class="aprov-grupo-badge">${alumnos.length} alum.${rezagados ? ` · <span style="color:var(--primario);font-weight:700;">${rezagados} rez.</span>` : ''}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('aprov-admin-lista-alumnos').innerHTML = '<div class="aprov-vacio">Selecciona un grupo</div>';
+  document.getElementById('aprov-admin-detalle').innerHTML = '<div class="aprov-vacio">👈 Selecciona un alumno</div>';
+}
+
+function selGrupoAdmin(grupo) {
+  document.querySelectorAll('.aprov-grupo-item').forEach(el => el.classList.remove('activo'));
+  const gid = grupo.replace(/[° ]/g, '_');
+  const el = document.getElementById(`aprov-gitem-${gid}`);
+  if (el) el.classList.add('activo');
+  document.getElementById('aprov-admin-grupo-label').textContent = grupo;
+  const lista = document.getElementById('aprov-admin-lista-alumnos');
+  const detalle = document.getElementById('aprov-admin-detalle');
+  detalle.innerHTML = '<div class="aprov-vacio">👈 Selecciona un alumno</div>';
+  const alumnos = DB.alumnos.filter(a => a.grupo === grupo && a.activo);
+  if (!alumnos.length) { lista.innerHTML = '<div class="aprov-vacio">No hay alumnos activos.</div>'; return; }
+  lista.innerHTML = alumnos.map(al => {
+    const sem = semColor(al);
+    const { pct } = calcularAprovechamiento(al);
+    return `<div class="aprov-alumno-item" id="aprov-item-adm-${al.id}" onclick="selAlumnoAdmin(${al.id})">
+      <div class="aprov-alumno-avatar">${al.nombre.split(' ').slice(0,2).map(p=>p[0]).join('')}</div>
+      <div class="aprov-alumno-info">
+        <div class="aprov-alumno-nombre">${al.nombre}</div>
+        <div class="aprov-alumno-grupo">${pct}% cumplimiento</div>
+      </div>
+      <div class="aprov-semaforo ${sem}"></div>
+    </div>`;
+  }).join('');
+}
+
+function selAlumnoAdmin(id) {
+  document.querySelectorAll('[id^="aprov-item-adm-"]').forEach(el => el.classList.remove('activo'));
+  document.getElementById(`aprov-item-adm-${id}`).classList.add('activo');
+  const al = DB.alumnos.find(a => a.id === id);
+  if (al) renderDetalleAlumno(al, 'aprov-admin-detalle');
+}
+</script>
+</body>
+</html>
